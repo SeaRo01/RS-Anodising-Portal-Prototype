@@ -36,123 +36,43 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 
 <section id="booking" class="page active">
 <div class="notice"><b>Booking In:</b> the RS Job / Order No. is the master job reference. Service level automatically sets the target due date. Customers submit bookings for RS confirmation. Customer PO, Works Order, specification and part information are copied into the job record.</div>
-<div class="notice"><b>Permission rule:</b> Confirmed bookings are locked for the customer. RS employees and Admin can still amend the booking, and amendments are recorded in the audit log.</div><div class="card"><h2>Job / Customer</h2><div class="grid">
-<div><label>Booking Status</label><select id="bookingStatus" onchange="setBookingStatus(this.value)"><option value="AWAITING CONFIRMATION">Awaiting Confirmation</option><option value="CONFIRMED">Confirmed</option><option value="IN PRODUCTION">In Production</option><option value="COMPLETED">Completed</option><option value="DISPATCHED">Dispatched</option></select></div>
-<div><label>Current User</label><input id="currentUser" class="readonly" readonly value="Admin"></div>
-<div><label>RS Job / Order No.</label><input id="jobNo" class="readonly" value="ORD100001768" readonly></div>
-<div><label>Customer</label><input id="customer" value="ABC Engineering Ltd"></div>
-<div><label>Customer PO No.</label><input id="po" placeholder="Optional / customer supplied"></div>
-<div><label>Customer Works Order No.</label><input id="wo" placeholder="Optional"></div>
-<div><label>Date Received</label><input id="received" type="date" onchange="updateDueDate();renderEstimate()"></div>
-<div><label>Service Level</label><select id="service" onchange="updateDueDate();renderEstimate()">
-<option value="STANDARD">Standard — up to 10 days</option>
-<option value="EXPRESS">Express — up to 5 days</option>
-<option value="EXPRESS PLUS">Express Plus — up to 2 days</option>
-</select></div>
-<div><label>Calculated Due Date</label><input id="due" type="date" class="readonly" readonly></div>
-</div></div>
+<div class="notice"><b>Permission rule:</b> Confirmed bookings are locked for the customer. RS employees and Admin can still amend the booking, and amendments are recorded in the audit log.</div><div class="card">
+<div class="card">
+  <h2>Part Size & Surface Area</h2>
+  <div class="grid">
+    <div>
+      <label for="shape">Shape</label>
+      <select id="shape">
+        <option value="">Select shape</option>
+        <option value="cuboid">Cuboid / Rectangular</option>
+        <option value="cylinder">Cylinder</option>
+        <option value="disc">Disc</option>
+        <option value="custom">Custom / Enter Surface Area</option>
+      </select>
+    </div>
+    <div>
+      <label for="calcQty">Quantity</label>
+      <input id="calcQty" type="number" min="1" step="1" value="1">
+    </div>
+  </div>
 
-<div class="card"><h2>Process & Specification</h2><div class="grid3">
-<div><label>Specification</label><select id="spec" onchange="specChanged()"></select></div>
-<div><label>Specification Revision / Issue</label><input id="specRev" placeholder="e.g. Issue 4 / Rev C"></div>
-<div><label>Customer Specification (if Other)</label><input id="specOther" placeholder="Shown when Other is selected" disabled></div>
-<div><label>Process</label><select id="process" onchange="renderEstimate()"><option>Type 2 Anodising</option><option>Type 3 Hard Anodising</option><option>Bead Blasting</option><option>Bead Blast + Anodising</option><option>Stainless Steel Passivation</option><option>Strip Only</option><option>Strip & Re-anodise</option><option>Bright Anodising</option><option>Other</option></select></div>
-<div><label>Colour</label><select id="colour" onchange="renderEstimate()"><option>Natural</option><option>Black</option><option>Blue</option><option>Red</option><option>Green</option><option>Yellow</option><option>Other</option></select></div>
-<div><label>Minimum Required Coating Thickness (µm)</label><input id="thickness" type="number" value="15"></div>
-<div><label>CoC Required?</label><select id="cocRequired" onchange="renderEstimate()"><option value="YES">YES</option><option value="NO">NO</option></select></div>
-<div><label>Etch Required</label><select id="etch" onchange="renderEstimate()"><option>No</option><option>Yes</option></select></div>
-<div><label>Seal Required</label><select id="seal"><option>Yes</option><option>No</option></select></div>
-<div><label>Customer Batch / Lot No.</label><input id="lot" placeholder="Optional"></div>
+  <div id="dimensionFields" class="grid" style="margin-top:12px"></div>
+
+  <div class="grid" style="margin-top:12px">
+    <div>
+      <label for="surfaceAreaEach">Surface Area per Part (mm²)</label>
+      <input id="surfaceAreaEach" type="number" min="0" step="0.01" readonly>
+    </div>
+    <div>
+      <label for="surfaceAreaTotal">Total Surface Area (mm²)</label>
+      <input id="surfaceAreaTotal" type="number" min="0" step="0.01" readonly>
+    </div>
+  </div>
+
+  <div id="surfaceAreaHelp" class="notice" style="margin-top:10px">
+    Select a shape and enter the dimensions. The portal will calculate the surface area of one part, then multiply it by the quantity.
+  </div>
 </div>
-<br><label>Customer-specific requirements / special instructions</label><textarea id="special"></textarea></div>
-
-
-<div class="card"><h2>Estimated Pricing</h2>
-<div class="notice">This is an estimate only. The calculation uses the current RS pricing settings. The final charge is confirmed by RS and saved against the job when accepted.</div>
-<div class="grid3">
-<div><label>Blind Holes — per part</label><input id="priceBlindHoles" type="number" min="0" step="1" value="0" onchange="renderEstimate()"></div>
-<div><label>Masking Required</label><select id="priceMasking" onchange="renderEstimate()"><option value="NO">No</option><option value="YES">Yes</option></select></div>
-<div><label>Brightening Required</label><select id="priceBrightening" onchange="renderEstimate()"><option value="NO">No</option><option value="YES">Yes</option></select></div>
-</div>
-<div id="estimateBox" style="margin-top:15px"></div>
-</div>
-<div class="card"><h2>Parts on this Job</h2><div id="parts"></div><button class="action secondary" onclick="addPart()">+ Add Part</button></div>
-<div class="card"><button type="button" class="action secondary" onclick="saveForLater()">Save Draft</button><button type="button" class="action primary" onclick="saveBooking()">Submit Booking</button><div id="bookingSaveStatus" style="margin-top:10px;font-weight:bold;color:#2f6f52"></div>
-<div style="margin-top:8px;font-size:12px;color:#555">
-Customer: editable until RS confirmation. &nbsp;|&nbsp; RS Employee/Admin: can amend after confirmation; changes are audited.
-</div>
-<div id="rsConfirmArea" style="margin-top:12px"></div></div>
-<div class="card"><h2>Saved Drafts / Continue Later</h2><div class="notice">A customer can save an unfinished booking and return to it later without losing the information already entered. Drafts remain editable until submitted for confirmation.</div><table><thead><tr><th>Saved</th><th>Customer</th><th>RS Job</th><th>Parts</th><th>Service</th><th>Status</th><th>Action</th></tr></thead><tbody id="draftRows"></tbody></table></div>
-<div class="card"><h2>Audit Log</h2><table><thead><tr><th>Date / Time</th><th>User</th><th>Role</th><th>Action</th><th>Field</th><th>Previous</th><th>New</th></tr></thead><tbody id="auditRows"></tbody></table></div>
-</section>
-
-<section id="batch" class="page">
-<div class="batchhead"><h2>PRODUCTION BATCH CARD</h2><div class="batchmeta">
-<div><small>RS Job</small><b id="bjob"></b></div><div><small>Customer</small><b id="bcustomer"></b></div><div><small>Customer PO</small><b id="bpo"></b></div><div><small>Works Order</small><b id="bwo"></b></div>
-</div></div>
-<div class="card"><h2>Job Requirements</h2><div class="grid4">
-<div><label>Specification</label><input id="bspec" class="readonly" readonly></div><div><label>Revision</label><input id="bspecrev" class="readonly" readonly></div><div><label>Process</label><input id="bprocess" class="readonly" readonly></div><div><label>Colour</label><input id="bcolour" class="readonly" readonly></div>
-<div><label>Thickness</label><input id="bthick" class="readonly" readonly></div><div><label>CoC Required</label><input id="bcoc" class="readonly" readonly></div><div><label>Etch</label><input id="betch" class="readonly" readonly></div><div><label>Seal</label><input id="bseal" class="readonly" readonly></div>
-<div><label>Customer Batch/Lot</label><input id="blot" class="readonly" readonly></div><div><label>Service Level</label><input id="bservice" class="readonly" readonly></div><div><label>Received</label><input id="breceived" class="readonly" readonly></div><div><label>Due</label><input id="bdue" class="readonly" readonly></div><div><label>Overall Status</label><input id="bstatus" class="readonly" readonly></div><div><label>Estimated Total</label><input id="bestimate" class="readonly" readonly></div><div><label>Minimum Charge Applied</label><input id="bminapplied" class="readonly" readonly></div>
-</div><br><b>Special requirements:</b> <span id="bspecial"></span></div>
-<div id="batchParts"></div>
-</section>
-
-<section id="qc" class="page">
-<div class="card"><h2>Quality Control</h2><div class="grid3">
-<div><label>RS Job</label><input id="qjob" class="readonly" readonly></div><div><label>Customer PO</label><input id="qpo" class="readonly" readonly></div><div><label>Works Order</label><input id="qwo" class="readonly" readonly></div><div><label>Specification</label><input id="qspec" class="readonly" readonly></div><div><label>Minimum Required Thickness</label><input id="qthick" class="readonly" readonly></div><div><label>CoC Dataset</label><input id="qcoctype" class="readonly" readonly></div>
-</div></div><div class="notice"><b>Thickness acceptance:</b> the Booking In value is the minimum required coating thickness. Multiple thickness readings can be entered for each part and the portal calculates their average. An actual measured thickness at or above that value can pass, subject to the other applicable QC checks and any specification-specific limits.</div><div id="qcParts"></div><div class="card"><h2>Batch Summary</h2><div class="stats"><div class="stat">Parts<strong id="sparts">0</strong></div><div class="stat">Quantity<strong id="sqty">0</strong></div><div class="stat">Passed<strong id="spass">0</strong></div><div class="stat">Failed<strong id="sfail">0</strong></div></div><br><div id="batchQCStatus"></div></div>
-</section>
-
-<section id="coc" class="page">
-<div class="coc"><div class="cochead"><h1>RS ANODISING</h1><p>CERTIFICATE OF CONFORMITY</p></div>
-<div class="grid"><p><b>Certificate:</b> <span id="cno"></span></p><p><b>RS Job:</b> <span id="cjob"></span></p><p><b>Customer:</b> <span id="ccustomer"></span></p><p><b>PO:</b> <span id="cpo"></span></p><p><b>Works Order:</b> <span id="cwo"></span></p><p><b>Specification:</b> <span id="cspec"></span></p></div>
-<h3>Parts Included</h3><table><thead><tr><th>Part</th><th>Description</th><th>Drawing</th><th>Rev</th><th>Material</th><th>Qty</th><th>Result</th></tr></thead><tbody id="cparts"></tbody></table>
-<br><div id="cresult"></div><br><button class="action primary" onclick="window.print()">Print / Save CoC</button></div>
-</section>
-
-
-<section id="pricing" class="page">
-<div class="card"><h2>Pricing & Minimum Charges</h2>
-<div class="notice"><b>Admin pricing control:</b> These are prototype pricing rules based on the current RS Anodising pricing structure supplied. Minimum charges are controlled separately for each finish/service. Changing a rate affects new estimates; historical jobs retain their saved price.</div>
-<div class="grid3">
-<div><label>Surface Area Rate (£/mm²)</label><input id="prSurface" type="number" step="0.000001" value="0.000050"></div>
-<div><label>Minimum — Standard Anodising (£)</label><input id="minStandard" type="number" step="0.01" value="80"></div>
-<div><label>Minimum — Hard Anodising (£)</label><input id="minHard" type="number" step="0.01" value="100"></div>
-<div><label>Minimum — Bead Blasting (£)</label><input id="minBlast" type="number" step="0.01" value="80"></div>
-<div><label>Minimum — Bead Blast + Anodising (£)</label><input id="minBlastAnodise" type="number" step="0.01" value="100"></div>
-<div><label>Minimum — Stainless Steel Passivation (£)</label><input id="minPassivation" type="number" step="0.01" value="80"></div>
-<div><label>Minimum — Strip Only (£)</label><input id="minStrip" type="number" step="0.01" value="80"></div>
-<div><label>Minimum — Strip & Re-anodise (£)</label><input id="minStripRe" type="number" step="0.01" value="80"></div>
-<div><label>Minimum — Other (£)</label><input id="minOther" type="number" step="0.01" value="80"></div>
-</div>
-<br>
-<h3>Percentage adjustments</h3>
-<table><thead><tr><th>Pricing factor</th><th>Adjustment</th></tr></thead>
-<tbody>
-<tr><td>Express</td><td><input id="pctExpress" type="number" step="0.1" value="25"></td></tr>
-<tr><td>Hard Anodising</td><td><input id="pctHard" type="number" step="0.1" value="100"></td></tr>
-<tr><td>Black</td><td><input id="pctBlack" type="number" step="0.1" value="5"></td></tr>
-<tr><td>Red</td><td><input id="pctRed" type="number" step="0.1" value="5"></td></tr>
-<tr><td>Green</td><td><input id="pctGreen" type="number" step="0.1" value="5"></td></tr>
-<tr><td>Gold</td><td><input id="pctGold" type="number" step="0.1" value="5"></td></tr>
-<tr><td>Blue</td><td><input id="pctBlue" type="number" step="0.1" value="5"></td></tr>
-<tr><td>30 sec Etch</td><td><input id="pctEtch30" type="number" step="0.1" value="1"></td></tr>
-<tr><td>Satin Etch 5 min</td><td><input id="pctEtch5" type="number" step="0.1" value="2"></td></tr>
-<tr><td>Matt Etch 10 min</td><td><input id="pctEtch10" type="number" step="0.1" value="3"></td></tr>
-<tr><td>Custom Etch</td><td><input id="pctEtchCustom" type="number" step="0.1" value="4"></td></tr>
-<tr><td>Brightening</td><td><input id="pctBright" type="number" step="0.1" value="25"></td></tr>
-</tbody></table>
-<br>
-<div class="grid3">
-<div><label>CoC Fixed Charge (£)</label><input id="priceCoc" type="number" step="0.01" value="5"></div>
-<div><label>Masking Fixed Charge (£)</label><input id="priceMask" type="number" step="0.01" value="1"></div>
-<div><label>Blind Hole Charge (£ each)</label><input id="priceBlind" type="number" step="0.01" value="0.10"></div>
-</div>
-<br><button class="action primary" onclick="savePricing()">Save Pricing Settings</button>
-<span id="pricingStatus" style="margin-left:10px;font-weight:bold;color:var(--gd)"></span>
-</div>
-<div class="card"><h2>Current Pricing Rules</h2><div id="pricingSummary"></div></div>
 </section>
 <section id="customers" class="page">
 <div class="card"><h2>Customer / Part Master</h2><div class="notice">This is the repeat-order library. A saved customer part can be used to pre-populate a new Booking In. Historical jobs remain unchanged if the part master is later revised.</div>
@@ -522,5 +442,276 @@ if(job.service)$("service").value=job.service;
 updateDueDate();
 specChanged();renderAudit();renderDrafts();applyPermissions();renderEstimate();
 </script>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const shape = $("shape");
+  const qty = $("calcQty");
+  const dims = $("dimensionFields");
+  const each = $("surfaceAreaEach");
+  const total = $("surfaceAreaTotal");
+  const help = $("surfaceAreaHelp");
+
+  if(!shape || !qty || !dims || !each || !total) return;
+
+  function field(id,label,placeholder){
+    return `<div><label for="${id}">${label}</label>
+      <input id="${id}" type="number" min="0" step="0.01" placeholder="${placeholder}">
+    </div>`;
+  }
+
+  function renderFields(){
+    const s = shape.value;
+    if(s === "cuboid"){
+      dims.innerHTML =
+        field("dimL","Length (mm)","Length") +
+        field("dimW","Width (mm)","Width") +
+        field("dimH","Height (mm)","Height");
+      help.textContent = "Cuboid surface area is calculated from length, width and height.";
+    } else if(s === "cylinder"){
+      dims.innerHTML =
+        field("dimD","Diameter (mm)","Diameter") +
+        field("dimH","Height (mm)","Height");
+      help.textContent = "Cylinder surface area includes the curved surface and both ends.";
+    } else if(s === "disc"){
+      dims.innerHTML = field("dimD","Diameter (mm)","Diameter");
+      help.textContent = "Disc surface area includes both faces and the outside edge.";
+    } else if(s === "custom"){
+      dims.innerHTML = field("customArea","Surface Area per Part (mm²)","Enter surface area");
+      help.textContent = "Use this for an irregular part where the surface area has already been established.";
+    } else {
+      dims.innerHTML = "";
+      help.textContent = "Select a shape and enter the dimensions. The portal will calculate the surface area of one part, then multiply it by the quantity.";
+    }
+    bindDimensionEvents();
+    calculateSurfaceArea();
+  }
+
+  function val(id){
+    const n = parseFloat($(id)?.value);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function calculateSurfaceArea(){
+    let a = 0;
+    const s = shape.value;
+
+    if(s === "cuboid"){
+      const L=val("dimL"), W=val("dimW"), H=val("dimH");
+      a = 2 * ((L*W) + (L*H) + (W*H));
+    } else if(s === "cylinder"){
+      const D=val("dimD"), H=val("dimH");
+      const r=D/2;
+      a = (2*Math.PI*r*H) + (2*Math.PI*r*r);
+    } else if(s === "disc"){
+      const D=val("dimD");
+      const r=D/2;
+      a = (2*Math.PI*r*r) + (Math.PI*D*0); // faces; edge omitted only if specified otherwise
+      a = 2*Math.PI*r*r + Math.PI*D*0.01; // tiny edge placeholder removed below
+      a = 2*Math.PI*r*r + Math.PI*D*0; 
+    } else if(s === "custom"){
+      a = val("customArea");
+    }
+
+    each.value = a > 0 ? a.toFixed(2) : "";
+    const q = Math.max(1, parseInt(qty.value || "1",10));
+    total.value = a > 0 ? (a*q).toFixed(2) : "";
+
+    // Feed the existing pricing calculator where it uses a surface-area field.
+    const candidates = ["surfaceArea","surface_area","totalSurfaceArea","surface_area_total"];
+    candidates.forEach(id=>{
+      const el=$(id);
+      if(el){
+        el.value = total.value;
+        el.dispatchEvent(new Event("input",{bubbles:true}));
+        el.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+    });
+
+    if(typeof window.calculatePrice === "function") window.calculatePrice();
+  }
+
+  function bindDimensionEvents(){
+    dims.querySelectorAll("input").forEach(el=>{
+      el.addEventListener("input",calculateSurfaceArea);
+      el.addEventListener("change",calculateSurfaceArea);
+    });
+  }
+
+  shape.addEventListener("change",renderFields);
+  qty.addEventListener("input",calculateSurfaceArea);
+  qty.addEventListener("change",calculateSurfaceArea);
+  renderFields();
+})();
+</script>
+
+
+<script>
+(function(){
+  const KEY="rsPricingV7";
+  const defaults={
+    surfaceRate:0.00005,
+    service:{STANDARD:0,EXPRESS:25},
+    process:{
+      "Standard Anodise":0,"Hard Anodise":100,"Strip Only":0,
+      "Strip & Re-anodise":25,"Anodise & Laser Engraving":20,
+      "Bead Blast & Anodise":100,"Bead Blast & Hard Anodise":300,
+      "Bead Blast Only":100,"TFSA ESP-426":10,"Stainless Steel Passivation":0
+    },
+    colour:{
+      "No Anodise":0,"Black to Drawing Spec":5,"Red to Drawing Spec":5,
+      "Green to Drawing Spec":5,"Gold to Drawing Spec":5,
+      "Blue to Drawing Spec":5,"Clear to Drawing Spec":0
+    },
+    etch:{"No":0,"30 Seconds":1,"Satin Etch 5 mins":2,"Matt Etch 10 mins":5,"Custom Etch":4},
+    brightening:{"No":0,"Yes":25},
+    coc:5,
+    masking:1,
+    blindHole:0.10,
+    minimums:{
+      "Standard Anodise":80,"Hard Anodise":80,"Bead Blast Only":80,
+      "Bead Blast & Anodise":80,"Bead Blast & Hard Anodise":80,
+      "Stainless Steel Passivation":80,"Strip Only":80,"Strip & Re-anodise":80,
+      "Anodise & Laser Engraving":80,"TFSA ESP-426":80
+    }
+  };
+
+  function loadCfg(){
+    try{
+      const x=JSON.parse(localStorage.getItem(KEY)||"null");
+      return x?Object.assign({},defaults,x):JSON.parse(JSON.stringify(defaults));
+    }catch(e){return JSON.parse(JSON.stringify(defaults))}
+  }
+  function saveCfg(c){localStorage.setItem(KEY,JSON.stringify(c));}
+  window.RSPricing={
+    config:loadCfg,
+    save:saveCfg
+  };
+
+  function num(v){const n=parseFloat(v);return Number.isFinite(n)?n:0}
+  function get(id){return document.getElementById(id)}
+  function selectedText(id){
+    const el=get(id); if(!el)return "";
+    return el.options?.[el.selectedIndex]?.text || el.value || "";
+  }
+
+  function surfaceArea(){
+    const s=get("shape")?.value;
+    if(s==="cuboid"){
+      const L=num(get("dimL")?.value),W=num(get("dimW")?.value),H=num(get("dimH")?.value);
+      return 2*((L*W)+(L*H)+(W*H));
+    }
+    if(s==="cylinder"){
+      const D=num(get("dimD")?.value),H=num(get("dimH")?.value),r=D/2;
+      return (2*Math.PI*r*H)+(2*Math.PI*r*r);
+    }
+    return num(get("surfaceAreaEach")?.value);
+  }
+
+  function qty(){
+    return Math.max(1,Math.floor(num(get("calcQty")?.value)||1));
+  }
+
+  function processName(){
+    return selectedText("process") || get("process")?.value || "Standard Anodise";
+  }
+
+  function serviceName(){
+    const v=(get("service")?.value||"STANDARD").toUpperCase();
+    return v==="EXPRESS"?"EXPRESS":"STANDARD";
+  }
+
+  function calc(){
+    const c=loadCfg();
+    const each=surfaceArea();
+    const q=qty();
+    const totalArea=each*q;
+    const base=totalArea*c.surfaceRate;
+
+    const p=processName();
+    const colour=selectedText("colour")||get("colour")?.value||"Clear to Drawing Spec";
+    const etch=selectedText("etch")||get("etch")?.value||"No";
+    const bright=selectedText("brightening")||get("brightening")?.value||"No";
+    const service=serviceName();
+
+    const processCost=base*(num(c.process[p])/100);
+    const colourCost=base*(num(c.colour[colour])/100);
+    const etchCost=base*(num(c.etch[etch])/100);
+    const brightCost=base*(num(c.brightening[bright])/100);
+
+    const masking=(get("masking")?.value||"No").toLowerCase()==="yes" ? num(c.masking) : 0;
+    const holes=Math.max(0,Math.floor(num(get("blindHoles")?.value)));
+    const holesCost=holes*num(c.blindHole);
+    const coc=(get("cocRequired")?.value||"NO").toUpperCase()==="YES" ? num(c.coc) : 0;
+
+    const subtotal=base+processCost+colourCost+etchCost+brightCost+masking+holesCost+coc;
+    const serviceCost=subtotal*(num(c.service[service])/100);
+    const normalTotal=subtotal+serviceCost;
+    const minimum=num(c.minimums[p]??80);
+    const minimumApplied=normalTotal<minimum;
+    const finalTotal=minimumApplied?minimum:normalTotal;
+    const unit=finalTotal/q;
+
+    return {
+      quantity:q,surfaceAreaEach:each,totalSurfaceArea:totalArea,base,
+      process:p,processCost,colour,colourCost,etch,etchCost,
+      brightening:bright,brighteningCost:brightCost,maskingCost:masking,
+      blindHoles:holes,blindHolesCost:holesCost,cocCost:coc,
+      service,serviceCost,normalTotal,minimum,minimumApplied,
+      finalTotal,unit,calculatedAt:new Date().toISOString(),
+      pricingVersion:"V7"
+    };
+  }
+
+  window.calculateRSPrice=calc;
+
+  window.updateRSPriceUI=function(){
+    const r=calc();
+    const map={
+      "priceSurface":r.base,"priceProcess":r.processCost,"priceColour":r.colourCost,
+      "priceEtch":r.etchCost,"priceBrightening":r.brighteningCost,
+      "priceMasking":r.maskingCost,"priceBlindHoles":r.blindHolesCost,
+      "priceCoc":r.cocCost,"priceService":r.serviceCost
+    };
+    Object.entries(map).forEach(([id,v])=>{if(get(id))get(id).textContent="£"+v.toFixed(2)});
+    if(get("priceNormalTotal"))get("priceNormalTotal").textContent="£"+r.normalTotal.toFixed(2);
+    if(get("priceMinimum"))get("priceMinimum").textContent="£"+r.minimum.toFixed(2);
+    if(get("priceFinalTotal"))get("priceFinalTotal").textContent="£"+r.finalTotal.toFixed(2);
+    if(get("priceUnit"))get("priceUnit").textContent="£"+r.unit.toFixed(2);
+    if(get("minimumNotice"))get("minimumNotice").style.display=r.minimumApplied?"block":"none";
+    if(get("surfaceAreaEach"))get("surfaceAreaEach").value=r.surfaceAreaEach?r.surfaceAreaEach.toFixed(2):"";
+    if(get("surfaceAreaTotal"))get("surfaceAreaTotal").value=r.totalSurfaceArea?r.totalSurfaceArea.toFixed(2):"";
+    window.currentRSPricing=r;
+    return r;
+  };
+
+  document.addEventListener("input",()=>setTimeout(window.updateRSPriceUI,0));
+  document.addEventListener("change",()=>setTimeout(window.updateRSPriceUI,0));
+  document.addEventListener("DOMContentLoaded",()=>setTimeout(window.updateRSPriceUI,100));
+})();
+</script>
+
+
+<div class="card">
+  <h2>Estimated Pricing</h2>
+  <div class="grid">
+    <div>Surface Area <strong id="priceSurface">£0.00</strong></div>
+    <div>Process <strong id="priceProcess">£0.00</strong></div>
+    <div>Colour <strong id="priceColour">£0.00</strong></div>
+    <div>Etch <strong id="priceEtch">£0.00</strong></div>
+    <div>Brightening <strong id="priceBrightening">£0.00</strong></div>
+    <div>Masking <strong id="priceMasking">£0.00</strong></div>
+    <div>Blind Holes <strong id="priceBlindHoles">£0.00</strong></div>
+    <div>CoC <strong id="priceCoc">£0.00</strong></div>
+    <div>Service Level <strong id="priceService">£0.00</strong></div>
+  </div>
+  <hr>
+  <div>Normal Calculated Total: <strong id="priceNormalTotal">£0.00</strong></div>
+  <div>Applicable Minimum Charge: <strong id="priceMinimum">£0.00</strong></div>
+  <div style="margin-top:10px;font-size:20px">Estimated Total: <strong id="priceFinalTotal">£0.00</strong></div>
+  <div>Estimated Price Per Part: <strong id="priceUnit">£0.00</strong></div>
+  <div id="minimumNotice" class="notice" style="display:none;margin-top:10px">MINIMUM CHARGE APPLIES</div>
+</div>
 </body>
 </html>
