@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RS Anodising - Traceability Prototype</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f3f5f7;
+        color: #20252b;
+    }
+
+    header {
+        background: #22282d;
+        color: white;
+        padding: 18px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 22px;
+    }
+
+    header span {
+        font-size: 13px;
+        opacity: .8;
+    }
+
+    nav {
+        background: white;
+        border-bottom: 1px solid #ddd;
+        padding: 12px 30px;
+    }
+
+    nav button {
+        border: 0;
+        background: transparent;
+        padding: 10px 18px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    nav button.active {
+        background: #22282d;
+        color: white;
+        border-radius: 5px;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 25px auto;
+        padding: 0 20px;
+    }
+
+    .page {
+        display: none;
+    }
+
+    .page.active {
+        display: block;
+    }
+
+    .card {
+        background: white;
+        border-radius: 8px;
+        padding: 22px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 7px rgba(0,0,0,.06);
+    }
+
+    .card h2 {
+        margin-top: 0;
+        font-size: 19px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 12px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    label {
+        display: block;
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccd1d5;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #555;
+    }
+
+    .readonly {
+        background: #f0f2f4;
+    }
+
+    .button {
+        border: 0;
+        border-radius: 5px;
+        padding: 11px 18px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .button-primary {
+        background: #22282d;
+        color: white;
+    }
+
+    .button-secondary {
+        background: #e8ebed;
+        color: #22282d;
+    }
+
+    .button-danger {
+        background: #b42318;
+        color: white;
+    }
+
+    .button-success {
+        background: #217a3b;
+        color: white;
+    }
+
+    .part {
+        border: 1px solid #d9dde1;
+        border-radius: 7px;
+        padding: 18px;
+        margin-bottom: 15px;
+        background: #fafbfc;
+    }
+
+    .part-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .part-header h3 {
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 11px;
+        border-bottom: 1px solid #e1e4e7;
+        text-align: left;
+        font-size: 13px;
+    }
+
+    th {
+        background: #f1f3f5;
+        font-weight: bold;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .pass {
+        background: #d9f2df;
+        color: #17632d;
+    }
+
+    .fail {
+        background: #fbd9d7;
+        color: #9b1c15;
+    }
+
+    .hold {
+        background: #fff0c2;
+        color: #765600;
+    }
+
+    .summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+
+    .summary-box {
+        background: #f5f6f7;
+        border-radius: 7px;
+        padding: 18px;
+    }
+
+    .summary-box strong {
+        display: block;
+        font-size: 25px;
+        margin-top: 5px;
+    }
+
+    .qc-part {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 7px;
+        margin-bottom: 20px;
+    }
+
+    .reading-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .coc {
+        background: white;
+        border: 1px solid #bbb;
+        padding: 40px;
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .coc-header {
+        text-align: center;
+        border-bottom: 2px solid #222;
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+    }
+
+    .coc-header h1 {
+        margin: 0;
+        font-size: 26px;
+    }
+
+    .coc-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    .coc-result {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 15px;
+        margin-top: 25px;
+        border: 2px solid #217a3b;
+        color: #17632d;
+    }
+
+    .notice {
+        background: #eef4ff;
+        border-left: 4px solid #3d68a8;
+        padding: 13px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    @media(max-width: 800px) {
+        .grid,
+        .grid-3,
+        .summary,
+        .coc-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .reading-row {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>RS Anodising — Traceability Portal</h1>
+    <span>Prototype / Development</span>
+</header>
+
+<nav>
+    <button class="nav-btn active" onclick="showPage('booking', this)">
+        Booking In
+    </button>
+
+    <button class="nav-btn" onclick="showPage('qc', this)">
+        Quality Control
+    </button>
+
+    <button class="nav-btn" onclick="showPage('coc', this)">
+        Certificate of Conformity
+    </button>
+</nav>
+
+<div class="container">
+
+<!-- ========================================================= -->
+<!-- BOOKING IN -->
+<!-- ========================================================= -->
+
+<section id="booking" class="page active">
+
+    <div class="notice">
+        <strong>Traceability:</strong>
+        The RS Job / Order No. is the master reference for this entire job.
+        Customer PO and Customer Works Order numbers will follow the job through production and QC.
+    </div>
+
+    <div class="card">
+
+        <h2>Job / Customer Information</h2>
+
+        <div class="grid">
+
+            <div>
+                <label>RS Job / Order No.</label>
+                <input id="jobNo"
+                       class="readonly"
+                       value="ORD100001768"
+                       readonly>
+            </div>
+
+            <div>
+                <label>Customer</label>
+                <input id="customer"
+                       value="ABC Engineering Ltd">
+            </div>
+
+            <div>
+                <label>Customer PO No.</label>
+                <input id="customerPO"
+                       placeholder="e.g. PO-45872">
+            </div>
+
+            <div>
+                <label>Customer Works Order No.</label>
+                <input id="worksOrder"
+                       placeholder="Optional">
+            </div>
+
+            <div>
+                <label>Date Received</label>
+                <input id="dateReceived" type="date">
+            </div>
+
+            <div>
+                <label>Required Completion Date</label>
+                <input id="requiredDate" type="date">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Process Requirements</h2>
+
+        <div class="grid-3">
+
+            <div>
+                <label>Process</label>
+                <select id="process">
+                    <option>Type 2 Anodising</option>
+                    <option>Type 3 Hard Anodising</option>
+                    <option>Bright Anodising</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Colour</label>
+                <select id="colour">
+                    <option>Natural</option>
+                    <option>Black</option>
+                    <option>Blue</option>
+                    <option>Red</option>
+                    <option>Green</option>
+                    <option>Yellow</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Required Coating Thickness (µm)</label>
+                <input id="targetThickness"
+                       type="number"
+                       value="15">
+            </div>
+
+            <div>
+                <label>Specification</label>
+                <input id="specification"
+                       placeholder="e.g. AMS 03-25">
+            </div>
+
+            <div>
+                <label>Specification Revision</label>
+                <input id="specRevision">
+            </div>
+
+            <div>
+                <label>Customer Batch / Lot No.</label>
+                <input id="customerLot"
+                       placeholder="Optional">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Parts on this Job</h2>
+
+        <div id="partsContainer"></div>
+
+        <button class="button button-secondary"
+                onclick="addPart()">
+            + Add Part
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Special Requirements</h2>
+
+        <div class="grid">
+
+            <div>
+                <label>Etch Required</label>
+                <select id="etch">
+                    <option>No</option>
+                    <option>Yes</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Seal Required</label>
+                <select id="sealRequired">
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+            </div>
+
+        </div>
+
+        <br>
+
+        <label>Special Instructions</label>
+        <textarea id="specialInstructions"></textarea>
+
+    </div>
+
+    <button class="button button-primary"
+            onclick="saveBooking()">
+        Save Booking / Continue to QC
+    </button>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- QC -->
+<!-- ========================================================= -->
+
+<section id="qc" class="page">
+
+    <div class="card">
+
+        <h2>Quality Control</h2>
+
+        <div class="grid-3">
+
+            <div>
+                <label>RS Job / Order No.</label>
+                <input id="qcJob"
+                       class="readonly"
+                       readonly>
+            </div>
+
+            <div>
+                <label>Customer PO</label>
+                <input id="qcPO"
+                       class="readonly"
+                       readonly>
+            </div>
+
+            <div>
+                <label>Customer Works Order</label>
+                <input id="qcWO"
+                       class="readonly"
+                       readonly>
+            </div>
+
+            <div>
+                <label>Customer</label>
+                <input id="qcCustomer"
+                       class="readonly"
+                       readonly>
+            </div>
+
+            <div>
+                <label>Specification</label>
+                <input id="qcSpec"
+                       class="readonly"
+                       readonly>
+            </div>
+
+            <div>
+                <label>Required Thickness</label>
+                <input id="qcTarget"
+                       class="readonly"
+                       readonly>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="qcParts"></div>
+
+    <div class="card">
+
+        <h2>Final Batch Result</h2>
+
+        <div class="summary">
+
+            <div class="summary-box">
+                Parts
+                <strong id="summaryParts">0</strong>
+            </div>
+
+            <div class="summary-box">
+                Quantity
+                <strong id="summaryQty">0</strong>
+            </div>
+
+            <div class="summary-box">
+                Passed
+                <strong id="summaryPassed">0</strong>
+            </div>
+
+            <div class="summary-box">
+                Failed
+                <strong id="summaryFailed">0</strong>
+            </div>
+
+        </div>
+
+        <br>
+
+        <div id="batchStatus"></div>
+
+    </div>
+
+    <button class="button button-success"
+            onclick="saveQC()">
+        Save QC Results
+    </button>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- COC -->
+<!-- ========================================================= -->
+
+<section id="coc" class="page">
+
+    <div class="coc">
+
+        <div class="coc-header">
+            <h1>RS ANODISING</h1>
+            <p>CERTIFICATE OF CONFORMITY</p>
+        </div>
+
+        <div class="coc-meta">
+
+            <div>
+                <strong>Certificate No:</strong>
+                <span id="cocNo"></span>
+            </div>
+
+            <div>
+                <strong>RS Job No:</strong>
+                <span id="cocJob"></span>
+            </div>
+
+            <div>
+                <strong>Customer:</strong>
+                <span id="cocCustomer"></span>
+            </div>
+
+            <div>
+                <strong>Customer PO:</strong>
+                <span id="cocPO"></span>
+            </div>
+
+            <div>
+                <strong>Customer Works Order:</strong>
+                <span id="cocWO"></span>
+            </div>
+
+            <div>
+                <strong>Date:</strong>
+                <span id="cocDate"></span>
+            </div>
+
+        </div>
+
+        <h3>Process</h3>
+
+        <table>
+            <tr>
+                <th>Process</th>
+                <td id="cocProcess"></td>
+            </tr>
+
+            <tr>
+                <th>Colour</th>
+                <td id="cocColour"></td>
+            </tr>
+
+            <tr>
+                <th>Specification</th>
+                <td id="cocSpec"></td>
+            </tr>
+
+            <tr>
+                <th>Required Thickness</th>
+                <td id="cocThickness"></td>
+            </tr>
+        </table>
+
+        <br>
+
+        <h3>Parts Included</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Part No.</th>
+                    <th>Description</th>
+                    <th>Drawing</th>
+                    <th>Rev</th>
+                    <th>Material</th>
+                    <th>Qty</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+
+            <tbody id="cocParts"></tbody>
+        </table>
+
+        <br>
+
+        <p>
+            The above parts have been processed and inspected
+            in accordance with the requirements specified for this job.
+        </p>
+
+        <div class="coc-result" id="cocResult">
+            BATCH PASS
+        </div>
+
+        <br>
+
+        <div class="grid">
+
+            <div>
+                <strong>Inspected By</strong>
+                <p>RS Anodising Quality</p>
+            </div>
+
+            <div>
+                <strong>Authorised By</strong>
+                <p>Quality Manager</p>
+            </div>
+
+        </div>
+
+        <br>
+
+        <button class="button button-primary"
+                onclick="window.print()">
+            Print / Save CoC
+        </button>
+
+    </div>
+
+</section>
+
+</div>
+
+
+<script>
+
+let parts = [];
+
+let job = {
+    jobNo: "ORD100001768",
+    customer: "",
+    customerPO: "",
+    worksOrder: "",
+    dateReceived: "",
+    requiredDate: "",
+    process: "",
+    colour: "",
+    targetThickness: 15,
+    specification: "",
+    specRevision: "",
+    customerLot: "",
+    etch: "",
+    sealRequired: "",
+    specialInstructions: ""
+};
+
+
+/* =========================================================
+   PAGE NAVIGATION
+========================================================= */
+
+function showPage(page, button) {
+
+    document.querySelectorAll(".page")
+        .forEach(p => p.classList.remove("active"));
+
+    document.getElementById(page)
+        .classList.add("active");
+
+    document.querySelectorAll(".nav-btn")
+        .forEach(b => b.classList.remove("active"));
+
+    button.classList.add("active");
+
+    if(page === "qc") {
+        loadQC();
+    }
+
+    if(page === "coc") {
+        generateCoC();
+    }
+}
+
+
+/* =========================================================
+   PARTS
+========================================================= */
+
+function addPart() {
+
+    const id = Date.now();
+
+    parts.push({
+        id: id,
+        partNo: "",
+        description: "",
+        drawing: "",
+        revision: "",
+        material: "6082-T6",
+        quantity: 0,
+        qc: {
+            readings: [],
+            visual: "",
+            seal: "",
+            checked: 0,
+            passed: 0,
+            failed: 0,
+            reprocessed: 0,
+            result: "HOLD"
+        }
+    });
+
+    renderParts();
+}
+
+
+function renderParts() {
+
+    const container =
+        document.getElementById("partsContainer");
+
+    container.innerHTML = "";
+
+    parts.forEach((part, index) => {
+
+        const div = document.createElement("div");
+
+        div.className = "part";
+
+        div.innerHTML = `
+
+            <div class="part-header">
+
+                <h3>Part ${index + 1}</h3>
+
+                <button class="button button-danger"
+                        onclick="removePart(${part.id})">
+                    Remove
+                </button>
+
+            </div>
+
+            <div class="grid-3">
+
+                <div>
+                    <label>Part Number</label>
+                    <input value="${part.partNo}"
+                           onchange="updatePart(${part.id}, 'partNo', this.value)">
+                </div>
+
+                <div>
+                    <label>Description</label>
+                    <input value="${part.description}"
+                           onchange="updatePart(${part.id}, 'description', this.value)">
+                </div>
+
+                <div>
+                    <label>Drawing No.</label>
+                    <input value="${part.drawing}"
+                           onchange="updatePart(${part.id}, 'drawing', this.value)">
+                </div>
+
+                <div>
+                    <label>Drawing Revision</label>
+                    <input value="${part.revision}"
+                           onchange="updatePart(${part.id}, 'revision', this.value)">
+                </div>
+
+                <div>
+                    <label>Material</label>
+                    <input value="${part.material}"
+                           onchange="updatePart(${part.id}, 'material', this.value)">
+                </div>
+
+                <div>
+                    <label>Quantity</label>
+                    <input type="number"
+                           value="${part.quantity}"
+                           onchange="updatePart(${part.id}, 'quantity', Number(this.value))">
+                </div>
+
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+function updatePart(id, field, value) {
+
+    const part = parts.find(p => p.id === id);
+
+    if(part) {
+        part[field] = value;
+    }
+}
+
+
+function removePart(id) {
+
+    parts = parts.filter(p => p.id !== id);
+
+    renderParts();
+}
+
+
+/* =========================================================
+   BOOKING
+========================================================= */
+
+function saveBooking() {
+
+    job.jobNo =
+        document.getElementById("jobNo").value;
+
+    job.customer =
+        document.getElementById("customer").value;
+
+    job.customerPO =
+        document.getElementById("customerPO").value;
+
+    job.worksOrder =
+        document.getElementById("worksOrder").value;
+
+    job.dateReceived =
+        document.getElementById("dateReceived").value;
+
+    job.requiredDate =
+        document.getElementById("requiredDate").value;
+
+    job.process =
+        document.getElementById("process").value;
+
+    job.colour =
+        document.getElementById("colour").value;
+
+    job.targetThickness =
+        Number(document.getElementById("targetThickness").value);
+
+    job.specification =
+        document.getElementById("specification").value;
+
+    job.specRevision =
+        document.getElementById("specRevision").value;
+
+    job.customerLot =
+        document.getElementById("customerLot").value;
+
+    job.etch =
+        document.getElementById("etch").value;
+
+    job.sealRequired =
+        document.getElementById("sealRequired").value;
+
+    job.specialInstructions =
+        document.getElementById("specialInstructions").value;
+
+    if(parts.length === 0) {
+
+        alert("Please add at least one part.");
+
+        return;
+    }
+
+    localStorage.setItem(
+        "rsAnodisingJob",
+        JSON.stringify(job)
+    );
+
+    localStorage.setItem(
+        "rsAnodisingParts",
+        JSON.stringify(parts)
+    );
+
+    alert("Booking saved successfully.");
+
+    loadQC();
+
+    document.querySelectorAll(".page")
+        .forEach(p => p.classList.remove("active"));
+
+    document.getElementById("qc")
+        .classList.add("active");
+
+    document.querySelectorAll(".nav-btn")
+        .forEach(b => b.classList.remove("active"));
+
+    document.querySelectorAll(".nav-btn")[1]
+        .classList.add("active");
+}
+
+
+/* =========================================================
+   QC
+========================================================= */
+
+function loadQC() {
+
+    const savedJob =
+        localStorage.getItem("rsAnodisingJob");
+
+    const savedParts =
+        localStorage.getItem("rsAnodisingParts");
+
+    if(savedJob) {
+        job = JSON.parse(savedJob);
+    }
+
+    if(savedParts) {
+        parts = JSON.parse(savedParts);
+    }
+
+    document.getElementById("qcJob").value =
+        job.jobNo;
+
+    document.getElementById("qcPO").value =
+        job.customerPO;
+
+    document.getElementById("qcWO").value =
+        job.worksOrder;
+
+    document.getElementById("qcCustomer").value =
+        job.customer;
+
+    document.getElementById("qcSpec").value =
+        job.specification;
+
+    document.getElementById("qcTarget").value =
+        job.targetThickness + " µm";
+
+    renderQC();
+
+    updateSummary();
+}
+
+
+function renderQC() {
+
+    const container =
+        document.getElementById("qcParts");
+
+    container.innerHTML = "";
+
+    parts.forEach((part, index) => {
+
+        const readings =
+            part.qc.readings || [];
+
+        const div =
+            document.createElement("div");
+
+        div.className = "card qc-part";
+
+        div.innerHTML = `
+
+            <h2>
+                Part ${index + 1} —
+                ${part.partNo || "No Part Number"}
+            </h2>
+
+            <p>
+                <strong>Description:</strong>
+                ${part.description}
+                &nbsp;&nbsp;
+                <strong>Drawing:</strong>
+                ${part.drawing}
+                &nbsp;&nbsp;
+                <strong>Rev:</strong>
+                ${part.revision}
+            </p>
+
+            <p>
+                <strong>Material:</strong>
+                ${part.material}
+                &nbsp;&nbsp;
+                <strong>Quantity:</strong>
+                ${part.quantity}
+            </p>
+
+            <hr>
+
+            <h3>Thickness Inspection</h3>
+
+            <p>
+                Required:
+                <strong>${job.targetThickness} µm</strong>
+            </p>
+
+            <div class="reading-row">
+
+                ${[0,1,2,3,4].map(i => `
+                    <div>
+                        <label>Reading ${i+1}</label>
+                        <input type="number"
+                               step="0.1"
+                               value="${readings[i] || ""}"
+                               onchange="updateReading(${part.id}, ${i}, this.value)">
+                    </div>
+                `).join("")}
+
+            </div>
+
+            <p>
+                Average:
+                <strong id="average-${part.id}">
+                    ${calculateAverage(part)}
+                </strong>
+            </p>
+
+            <div class="grid-3">
+
+                <div>
+                    <label>Visual Inspection</label>
+
+                    <select onchange="updateQC(${part.id}, 'visual', this.value)">
+                        <option value="">Select</option>
+                        <option value="PASS" ${part.qc.visual === "PASS" ? "selected" : ""}>PASS</option>
+                        <option value="FAIL" ${part.qc.visual === "FAIL" ? "selected" : ""}>FAIL</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Seal Test</label>
+
+                    <select onchange="updateQC(${part.id}, 'seal', this.value)">
+                        <option value="">Select</option>
+                        <option value="PASS" ${part.qc.seal === "PASS" ? "selected" : ""}>PASS</option>
+                        <option value="FAIL" ${part.qc.seal === "FAIL" ? "selected" : ""}>FAIL</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Quantity Checked</label>
+
+                    <input type="number"
+                           value="${part.qc.checked || 0}"
+                           onchange="updateQC(${part.id}, 'checked', Number(this.value))">
+                </div>
+
+                <div>
+                    <label>Quantity Passed</label>
+
+                    <input type="number"
+                           value="${part.qc.passed || 0}"
+                           onchange="updateQC(${part.id}, 'passed', Number(this.value))">
+                </div>
+
+                <div>
+                    <label>Quantity Failed</label>
+
+                    <input class="readonly"
+                           readonly
+                           value="${Math.max(
+                               0,
+                               (part.qc.checked || 0) -
+                               (part.qc.passed || 0)
+                           )}">
+                </div>
+
+                <div>
+                    <label>Reprocessed</label>
+
+                    <input class="readonly"
+                           readonly
+                           value="${part.qc.reprocessed || 0}">
+                </div>
+
+            </div>
+
+            <br>
+
+            <div id="result-${part.id}">
+                ${getPartResultHTML(part)}
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+function updateReading(id, index, value) {
+
+    const part =
+        parts.find(p => p.id === id);
+
+    if(!part) return;
+
+    if(!part.qc.readings) {
+        part.qc.readings = [];
+    }
+
+    part.qc.readings[index] =
+        Number(value);
+
+    updatePartResult(part);
+
+    updateSummary();
+}
+
+
+function updateQC(id, field, value) {
+
+    const part =
+        parts.find(p => p.id === id);
+
+    if(!part) return;
+
+    part.qc[field] = value;
+
+    if(field === "checked" ||
+       field === "passed") {
+
+        part.qc.failed =
+            Math.max(
+                0,
+                part.qc.checked -
+                part.qc.passed
+            );
+
+        part.qc.reprocessed =
+            part.qc.failed;
+    }
+
+    updatePartResult(part);
+
+    updateSummary();
+}
+
+
+function calculateAverage(part) {
+
+    if(!part.qc.readings) return "-";
+
+    const values =
+        part.qc.readings.filter(
+            n => typeof n === "number" && !isNaN(n)
+        );
+
+    if(values.length === 0) return "-";
+
+    const total =
+        values.reduce(
+            (sum, value) => sum + value,
+            0
+        );
+
+    return (total / values.length)
+        .toFixed(2) + " µm";
+}
+
+
+function getPartResult(part) {
+
+    const readings =
+        part.qc.readings || [];
+
+    const validReadings =
+        readings.filter(
+            n => typeof n === "number" && !isNaN(n)
+        );
+
+    if(validReadings.length === 0) {
+        return "HOLD";
+    }
+
+    const average =
+        validReadings.reduce(
+            (a,b) => a+b,
+            0
+        ) / validReadings.length;
+
+    const min =
+        job.targetThickness * 0.90;
+
+    const max =
+        job.targetThickness * 1.10;
+
+    if(average < min || average > max) {
+        return "FAIL";
+    }
+
+    if(part.qc.visual === "FAIL" ||
+       part.qc.seal === "FAIL") {
+        return "FAIL";
+    }
+
+    if(part.qc.checked > 0 &&
+       part.qc.passed < part.qc.checked) {
+        return "REWORK";
+    }
+
+    if(part.qc.visual === "PASS" &&
+       part.qc.seal === "PASS") {
+        return "PASS";
+    }
+
+    return "HOLD";
+}
+
+
+function getPartResultHTML(part) {
+
+    const result =
+        getPartResult(part);
+
+    part.qc.result = result;
+
+    let cls = "hold";
+
+    if(result === "PASS") cls = "pass";
+    if(result === "FAIL") cls = "fail";
+
+    return `
+        <span class="status ${cls}">
+            ${result}
+        </span>
+    `;
+}
+
+
+function updatePartResult(part) {
+
+    const element =
+        document.getElementById(
+            "result-" + part.id
+        );
+
+    if(element) {
+        element.innerHTML =
+            getPartResultHTML(part);
+    }
+
+    const average =
+        document.getElementById(
+            "average-" + part.id
+        );
+
+    if(average) {
+        average.innerText =
+            calculateAverage(part);
+    }
+
+    updateSummary();
+}
+
+
+function updateSummary() {
+
+    let totalQty = 0;
+    let totalPassed = 0;
+    let totalFailed = 0;
+
+    parts.forEach(part => {
+
+        totalQty += Number(part.quantity || 0);
+
+        totalPassed +=
+            Number(part.qc.passed || 0);
+
+        totalFailed +=
+            Math.max(
+                0,
+                Number(part.qc.checked || 0) -
+                Number(part.qc.passed || 0)
+            );
+    });
+
+    document.getElementById("summaryParts")
+        .innerText = parts.length;
+
+    document.getElementById("summaryQty")
+        .innerText = totalQty;
+
+    document.getElementById("summaryPassed")
+        .innerText = totalPassed;
+
+    document.getElementById("summaryFailed")
+        .innerText = totalFailed;
+
+    let batchResult = "PASS";
+
+    parts.forEach(part => {
+
+        const result =
+            getPartResult(part);
+
+        if(result === "FAIL" ||
+           result === "REWORK" ||
+           result === "HOLD") {
+
+            batchResult = "HOLD";
+        }
+    });
+
+    document.getElementById("batchStatus")
+        .innerHTML = `
+            <span class="status ${
+                batchResult === "PASS"
+                ? "pass"
+                : "hold"
+            }">
+                BATCH STATUS: ${batchResult}
+            </span>
+        `;
+}
+
+
+function saveQC() {
+
+    parts.forEach(part => {
+
+        part.qc.failed =
+            Math.max(
+                0,
+                Number(part.qc.checked || 0) -
+                Number(part.qc.passed || 0)
+            );
+
+        part.qc.reprocessed =
+            part.qc.failed;
+
+        part.qc.result =
+            getPartResult(part);
+    });
+
+    localStorage.setItem(
+        "rsAnodisingParts",
+        JSON.stringify(parts)
+    );
+
+    alert(
+        "QC results saved.\n\n" +
+        "You can now view the Certificate of Conformity."
+    );
+
+    generateCoC();
+}
+
+
+/* =========================================================
+   COC
+========================================================= */
+
+function generateCoC() {
+
+    document.getElementById("cocNo")
+        .innerText =
+        "COC-" + job.jobNo;
+
+    document.getElementById("cocJob")
+        .innerText =
+        job.jobNo;
+
+    document.getElementById("cocCustomer")
+        .innerText =
+        job.customer;
+
+    document.getElementById("cocPO")
+        .innerText =
+        job.customerPO || "Not supplied";
+
+    document.getElementById("cocWO")
+        .innerText =
+        job.worksOrder || "Not supplied";
+
+    document.getElementById("cocDate")
+        .innerText =
+        new Date().toLocaleDateString("en-GB");
+
+    document.getElementById("cocProcess")
+        .innerText =
+        job.process;
+
+    document.getElementById("cocColour")
+        .innerText =
+        job.colour;
+
+    document.getElementById("cocSpec")
+        .innerText =
+        job.specification || "Not specified";
+
+    document.getElementById("cocThickness")
+        .innerText =
+        job.targetThickness + " µm";
+
+
+    const table =
+        document.getElementById("cocParts");
+
+    table.innerHTML = "";
+
+    let batchPass = true;
+
+    parts.forEach(part => {
+
+        const result =
+            getPartResult(part);
+
+        if(result !== "PASS") {
+            batchPass = false;
+        }
+
+        const row =
+            document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${part.partNo}</td>
+            <td>${part.description}</td>
+            <td>${part.drawing}</td>
+            <td>${part.revision}</td>
+            <td>${part.material}</td>
+            <td>${part.quantity}</td>
+            <td>
+                <span class="status ${
+                    result === "PASS"
+                    ? "pass"
+                    : "hold"
+                }">
+                    ${result}
+                </span>
+            </td>
+        `;
+
+        table.appendChild(row);
+    });
+
+    const resultBox =
+        document.getElementById("cocResult");
+
+    if(batchPass) {
+
+        resultBox.innerText =
+            "BATCH PASS";
+
+        resultBox.style.color =
+            "#17632d";
+
+        resultBox.style.borderColor =
+            "#217a3b";
+
+    } else {
+
+        resultBox.innerText =
+            "BATCH NOT RELEASED — QC / REWORK REQUIRED";
+
+        resultBox.style.color =
+            "#9b1c15";
+
+        resultBox.style.borderColor =
+            "#b42318";
+    }
+}
+
+
+/* =========================================================
+   INITIALISE
+========================================================= */
+
+document.getElementById("dateReceived").value =
+    new Date().toISOString().split("T")[0];
+
+addPart();
+
+</script>
+
+</body>
+</html>
