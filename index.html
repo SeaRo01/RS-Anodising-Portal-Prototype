@@ -1,169 +1,61 @@
-<!doctype html>
-<html lang="en-GB">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RS Anodising | Traceability Portal</title>
-<style>
-:root{--g:#2f6f52;--gd:#1f4d39;--gl:#e2eee8;--d:#252b2a;--m:#89918e;--ml:#dce1df;--bg:#eef1f0;--w:#fff;--b:#c8cfcc;--pass:#247a45;--fail:#b52a25;--hold:#a27616}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#252525}
-header{background:linear-gradient(135deg,#1f2925,#40534a,#1f2925);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--g)}
-header h1{margin:0;font-size:22px}header small{opacity:.75}nav{background:var(--d);display:flex;overflow:auto}nav button{border:0;background:transparent;color:#d5dbd8;padding:14px 18px;font-weight:bold;cursor:pointer}nav button.active{background:var(--g);color:#fff}
-.container{max-width:1450px;margin:24px auto;padding:0 18px}.page{display:none}.page.active{display:block}.card{background:#fff;border:1px solid var(--b);border-radius:7px;padding:20px;margin-bottom:18px;box-shadow:0 3px 10px #0000000d}.card h2{margin:0 0 15px;color:var(--gd);border-bottom:2px solid var(--ml);padding-bottom:10px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}label{display:block;font-size:12px;font-weight:bold;color:#4d5553;margin-bottom:5px}input,select,textarea{width:100%;padding:9px;border:1px solid #bbc4c0;border-radius:5px;background:#fff}textarea{min-height:75px}.readonly{background:#edf0ef}
-button.action{border:0;border-radius:5px;padding:10px 15px;font-weight:bold;cursor:pointer;margin:3px}.primary{background:linear-gradient(135deg,var(--g),var(--gd));color:#fff}.secondary{background:linear-gradient(#e8ebea,#cfd5d2);color:#222}.danger{background:var(--fail);color:#fff}.success{background:var(--pass);color:#fff}
-.notice{background:var(--gl);border-left:5px solid var(--g);padding:12px;margin-bottom:18px}.part{border:1px solid var(--b);border-left:5px solid var(--g);padding:17px;border-radius:6px;margin:12px 0;background:#fafcfb}.parthead{display:flex;justify-content:space-between;align-items:center}.parthead h3{color:var(--gd)}
-.thumb{width:170px;height:125px;border:2px dashed #aab3af;border-radius:6px;background:#f3f5f4;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;text-align:center;color:#707976}.thumb img{width:100%;height:100%;object-fit:contain;background:#fff}
-.parttop{display:grid;grid-template-columns:190px 1fr;gap:20px}.jig{margin-top:15px;background:#edf4f0;border:1px solid #c9d8d0;border-radius:6px;padding:15px}.jig h3{margin-top:0;color:var(--gd)}
-.batchhead{background:linear-gradient(135deg,#27322e,#40534a);color:#fff;padding:20px;border-radius:7px;margin-bottom:18px}.batchhead h2{margin:0 0 15px}.batchmeta{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.batchmeta div{background:#ffffff12;border:1px solid #ffffff22;padding:10px;border-radius:4px}.batchmeta small{display:block;opacity:.7}
-table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #dde2e0;text-align:left;font-size:13px}th{background:linear-gradient(#e7eae9,#d4d9d7)}.status{display:inline-block;padding:5px 10px;border-radius:15px;font-size:11px;font-weight:bold}.pass{background:#d9f0df;color:#17632f}.fail{background:#f8d8d6;color:#941f1b}.hold{background:#fff0c4;color:#735300}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{padding:15px;background:linear-gradient(135deg,#f4f6f5,#dfe4e2);border:1px solid var(--b);border-radius:6px}.stat strong{display:block;font-size:23px;color:var(--gd)}
-.coc{background:#fff;border:1px solid #aaa;padding:35px;max-width:1050px;margin:auto}.cochead{text-align:center;border-bottom:3px solid var(--g);padding-bottom:15px}.cochead h1{color:var(--gd)}.modal{display:none;position:fixed;inset:0;background:#000c;z-index:9;align-items:center;justify-content:center}.modal.show{display:flex}.modal img{max-width:90vw;max-height:88vh;background:#fff}.close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;cursor:pointer}
-@media(max-width:850px){.grid,.grid3,.grid4,.batchmeta,.stats,.parttop{grid-template-columns:1fr}.thumb{width:100%;max-width:300px}}
-@media print{header,nav,.action{display:none!important}body{background:#fff}.coc{border:0;box-shadow:none}}
-</style>
-</head>
-<body>
-<header><div><h1>RS Anodising</h1><small>Production & Traceability Portal</small></div><small>DEVELOPMENT PROTOTYPE</small></header>
-<nav>
-<button class="active" onclick="page('booking',this)">Booking In</button>
-<button onclick="page('batch',this)">Batch Card</button>
-<button onclick="page('qc',this)">Quality Control</button>
-<button onclick="page('coc',this)">Certificate of Conformity</button>
-<button onclick="page('customers',this)">Customers / Parts</button>
-</nav>
-<main class="container">
+from pathlib import Path
+src=Path("/mnt/data/RS-Anodising-Portal-Prototype-v2.html")
+html=src.read_text(encoding="utf-8")
 
-<section id="booking" class="page active">
-<div class="notice"><b>Booking In:</b> the RS Job / Order No. is the master job reference. Customer PO, Works Order, specification and part information are copied into the job record.</div>
-<div class="card"><h2>Job / Customer</h2><div class="grid">
-<div><label>RS Job / Order No.</label><input id="jobNo" class="readonly" value="ORD100001768" readonly></div>
-<div><label>Customer</label><input id="customer" value="ABC Engineering Ltd"></div>
-<div><label>Customer PO No.</label><input id="po" placeholder="Optional / customer supplied"></div>
-<div><label>Customer Works Order No.</label><input id="wo" placeholder="Optional"></div>
-<div><label>Date Received</label><input id="received" type="date"></div>
-<div><label>Required Completion Date</label><input id="due" type="date"></div>
-</div></div>
-
-<div class="card"><h2>Process & Specification</h2><div class="grid3">
-<div><label>Specification</label><select id="spec" onchange="specChanged()"></select></div>
-<div><label>Specification Revision / Issue</label><input id="specRev" placeholder="e.g. Issue 4 / Rev C"></div>
-<div><label>Customer Specification (if Other)</label><input id="specOther" placeholder="Shown when Other is selected" disabled></div>
-<div><label>Process</label><select id="process"><option>Type 2 Anodising</option><option>Type 3 Hard Anodising</option><option>Bright Anodising</option><option>Other</option></select></div>
-<div><label>Colour</label><select id="colour"><option>Natural</option><option>Black</option><option>Blue</option><option>Red</option><option>Green</option><option>Yellow</option><option>Other</option></select></div>
-<div><label>Required Coating Thickness (µm)</label><input id="thickness" type="number" value="15"></div>
-<div><label>CoC Required?</label><select id="cocRequired"><option value="YES">YES</option><option value="NO">NO</option></select></div>
-<div><label>Etch Required</label><select id="etch"><option>No</option><option>Yes</option></select></div>
-<div><label>Seal Required</label><select id="seal"><option>Yes</option><option>No</option></select></div>
-<div><label>Customer Batch / Lot No.</label><input id="lot" placeholder="Optional"></div>
-</div>
-<br><label>Customer-specific requirements / special instructions</label><textarea id="special"></textarea></div>
-
-<div class="card"><h2>Parts on this Job</h2><div id="parts"></div><button class="action secondary" onclick="addPart()">+ Add Part</button></div>
-<div class="card"><button class="action primary" onclick="saveBooking()">Save Booking / Open Batch Card</button></div>
-</section>
-
-<section id="batch" class="page">
-<div class="batchhead"><h2>PRODUCTION BATCH CARD</h2><div class="batchmeta">
-<div><small>RS Job</small><b id="bjob"></b></div><div><small>Customer</small><b id="bcustomer"></b></div><div><small>Customer PO</small><b id="bpo"></b></div><div><small>Works Order</small><b id="bwo"></b></div>
-</div></div>
-<div class="card"><h2>Job Requirements</h2><div class="grid4">
-<div><label>Specification</label><input id="bspec" class="readonly" readonly></div><div><label>Revision</label><input id="bspecrev" class="readonly" readonly></div><div><label>Process</label><input id="bprocess" class="readonly" readonly></div><div><label>Colour</label><input id="bcolour" class="readonly" readonly></div>
-<div><label>Thickness</label><input id="bthick" class="readonly" readonly></div><div><label>CoC Required</label><input id="bcoc" class="readonly" readonly></div><div><label>Etch</label><input id="betch" class="readonly" readonly></div><div><label>Seal</label><input id="bseal" class="readonly" readonly></div>
-<div><label>Customer Batch/Lot</label><input id="blot" class="readonly" readonly></div><div><label>Received</label><input id="breceived" class="readonly" readonly></div><div><label>Due</label><input id="bdue" class="readonly" readonly></div><div><label>Overall Status</label><input id="bstatus" class="readonly" readonly></div>
-</div><br><b>Special requirements:</b> <span id="bspecial"></span></div>
-<div id="batchParts"></div>
-</section>
-
-<section id="qc" class="page">
-<div class="card"><h2>Quality Control</h2><div class="grid3">
-<div><label>RS Job</label><input id="qjob" class="readonly" readonly></div><div><label>Customer PO</label><input id="qpo" class="readonly" readonly></div><div><label>Works Order</label><input id="qwo" class="readonly" readonly></div><div><label>Specification</label><input id="qspec" class="readonly" readonly></div><div><label>Required Thickness</label><input id="qthick" class="readonly" readonly></div><div><label>CoC Dataset</label><input id="qcoctype" class="readonly" readonly></div>
-</div></div><div id="qcParts"></div><div class="card"><h2>Batch Summary</h2><div class="stats"><div class="stat">Parts<strong id="sparts">0</strong></div><div class="stat">Quantity<strong id="sqty">0</strong></div><div class="stat">Passed<strong id="spass">0</strong></div><div class="stat">Failed<strong id="sfail">0</strong></div></div><br><div id="batchQCStatus"></div></div>
-</section>
-
-<section id="coc" class="page">
-<div class="coc"><div class="cochead"><h1>RS ANODISING</h1><p>CERTIFICATE OF CONFORMITY</p></div>
-<div class="grid"><p><b>Certificate:</b> <span id="cno"></span></p><p><b>RS Job:</b> <span id="cjob"></span></p><p><b>Customer:</b> <span id="ccustomer"></span></p><p><b>PO:</b> <span id="cpo"></span></p><p><b>Works Order:</b> <span id="cwo"></span></p><p><b>Specification:</b> <span id="cspec"></span></p></div>
-<h3>Parts Included</h3><table><thead><tr><th>Part</th><th>Description</th><th>Drawing</th><th>Rev</th><th>Material</th><th>Qty</th><th>Result</th></tr></thead><tbody id="cparts"></tbody></table>
-<br><div id="cresult"></div><br><button class="action primary" onclick="window.print()">Print / Save CoC</button></div>
-</section>
-
-<section id="customers" class="page">
-<div class="card"><h2>Customer / Part Master</h2><div class="notice">This is the repeat-order library. A saved customer part can be used to pre-populate a new Booking In. Historical jobs remain unchanged if the part master is later revised.</div>
-<div class="grid"><div><label>Customer</label><input id="cmCustomer" placeholder="Customer name"></div><div><label>Part Number</label><input id="cmPart" placeholder="Customer part number"></div></div><br><button class="action primary" onclick="savePartMaster()">Save Customer Part</button></div>
-<div class="card"><h2>Saved Customer Parts</h2><table><thead><tr><th>Customer</th><th>Part</th><th>Description</th><th>Specification</th><th>Revision</th><th>Action</th></tr></thead><tbody id="masterRows"></tbody></table></div>
-</section>
-
-</main>
-
-<div id="modal" class="modal" onclick="closeModal()"><span class="close">&times;</span><img id="modalImg"></div>
-
-<script>
-const SPECS=[
-["BS EN ISO 7599:2018","General decorative/protective anodising"],
-["BS ISO 10074:2021","Hard anodising"],
-["BS EN 2536:1995","Aerospace hard anodising"],
-["DEF STAN 03-24","Chromic acid anodising"],
-["DEF STAN 03-25","Sulphuric acid anodising"],
-["DEF STAN 03-26","Hard anodising"],
-["DEF STAN 21-5 Part 2-1","Sulphuric anodising"],
-["DEF STAN 21-5 Part 2-2","Chromic acid anodising"],
-["DEF STAN 21-5 Part 2-3","Hard anodising"],
-["MIL-PRF-8625F","Anodic coatings for aluminium"],
-["MIL-A-8625F","Legacy military anodising specification"],
-["AMS 2471","Sulphuric anodising"],
-["AMS 2472","Dyed sulphuric anodising"],
-["AMS 2468","Hard anodising"],
-["AMS 2469","Dyed hard anodising"],
-["MIL-STD-171","Finishing of metal and wood surfaces"],
-["ASTM B580","Anodic oxide coatings on aluminium"],
-["JP 213 Method 1","Customer/industry anodising specification"],
-["JP 217","Customer/industry anodising specification"],
-["DS 26.00 F3 + D2","Customer/industry anodising specification"],
-["TS112 F3 + D2","Customer/industry anodising specification"],
-["P&G STD 41-013","Customer/industry anodising specification"],
-["OTHER","Customer specification - enter manually"]
+# Add aluminium grades before specs.
+html=html.replace("const SPECS=[", """const AL_GRADES=[
+["","Not specified"],["6082-T6","6082-T6"],["6061-T6","6061-T6"],["6063-T6","6063-T6"],
+["6082-T651","6082-T651"],["7075-T6","7075-T6"],["2024-T3","2024-T3"],["2014-T6","2014-T6"],
+["5083","5083"],["5754","5754"],["Other","Other — enter manually"]
 ];
-let job={jobNo:"ORD100001768"},parts=[],masters=[];
+const SPECS=[""")
 
-function $(id){return document.getElementById(id)}
-function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function save(){localStorage.rsJob=JSON.stringify(job);localStorage.rsParts=JSON.stringify(parts);localStorage.rsMasters=JSON.stringify(masters)}
-function load(){try{job=JSON.parse(localStorage.rsJob)||job;parts=JSON.parse(localStorage.rsParts)||[];masters=JSON.parse(localStorage.rsMasters)||[]}catch(e){}}
-function page(id,btn){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="batch")renderBatch();if(id==="qc")renderQC();if(id==="coc")renderCoC();if(id==="customers")renderMasters()}
-function specChanged(){let other=$("spec").value==="OTHER";$("specOther").disabled=!other;if(!other)$("specOther").value=""}
-function addPart(){parts.push({id:Date.now(),partNo:"",description:"",drawing:"",revision:"",material:"6082-T6",quantity:0,image:"",surfaceArea:"",jig:{rack:"",jig:"",qty:0,operator:"",notes:"",reference:"",actual:""},qc:{readings:[],visual:"",seal:"",checked:0,passed:0,result:"HOLD"}});renderParts()}
-function removePart(id){parts=parts.filter(p=>p.id!==id);renderParts();save()}
-function setPart(id,f,v){let p=parts.find(x=>x.id===id);if(p){p[f]=v;save()}}
-function imageUpload(id,input,type){let f=input.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{let p=parts.find(x=>x.id===id);if(type==="part")p.image=e.target.result;if(type==="ref")p.jig.reference=e.target.result;if(type==="actual")p.jig.actual=e.target.result;save();renderParts();renderBatch()};r.readAsDataURL(f)}
-function img(src,cls="thumb"){return src?`<div class="${cls}" onclick="openModal('${src}')"><img src="${src}"></div>`:`<div class="${cls}">No image uploaded</div>`}
-function renderParts(){let c=$("parts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="part"><div class="parthead"><h3>Part ${i+1}</h3><button class="action danger" onclick="removePart(${p.id})">Remove</button></div><div class="parttop"><div>${img(p.image)}<br><label>Part Image</label><input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'part')"></div><div class="grid3"><div><label>Part Number</label><input value="${esc(p.partNo)}" onchange="setPart(${p.id},'partNo',this.value)"></div><div><label>Description</label><input value="${esc(p.description)}" onchange="setPart(${p.id},'description',this.value)"></div><div><label>Drawing</label><input value="${esc(p.drawing)}" onchange="setPart(${p.id},'drawing',this.value)"></div><div><label>Drawing Revision</label><input value="${esc(p.revision)}" onchange="setPart(${p.id},'revision',this.value)"></div><div><label>Material</label><input value="${esc(p.material)}" onchange="setPart(${p.id},'material',this.value)"></div><div><label>Quantity</label><input type="number" value="${p.quantity}" onchange="setPart(${p.id},'quantity',Number(this.value))"></div><div><label>Surface Area (mm²)</label><input value="${esc(p.surfaceArea)}" onchange="setPart(${p.id},'surfaceArea',this.value)"></div></div></div></div>`})}
-function saveBooking(){job={...job,jobNo:$("jobNo").value,customer:$("customer").value,po:$("po").value,wo:$("wo").value,received:$("received").value,due:$("due").value,spec:$("spec").value,specOther:$("specOther").value,specRev:$("specRev").value,process:$("process").value,colour:$("colour").value,thickness:Number($("thickness").value),coc:$("cocRequired").value,etch:$("etch").value,seal:$("seal").value,lot:$("lot").value,special:$("special").value};let bad=parts.filter(p=>[p.partNo,p.description,p.material].every(x=>!String(x||"").trim())&&!Number(p.quantity)&&!p.drawing&&!p.image);parts=parts.filter(p=>!bad.includes(p));if(!parts.length){alert("Add at least one completed part.");return}let incomplete=parts.find(p=>!p.partNo||!p.quantity);if(incomplete){alert("Please complete the Part Number and Quantity for each part, or remove the unused part.");return}save();alert("Booking saved.");renderBatch();page("batch",document.querySelectorAll("nav button")[1])}
-function renderBatch(){load();$("bjob").textContent=job.jobNo||"";$("bcustomer").textContent=job.customer||"";$("bpo").textContent=job.po||"Not supplied";$("bwo").textContent=job.wo||"Not supplied";$("bspec").value=job.spec==="OTHER"?job.specOther:job.spec||"";$("bspecrev").value=job.specRev||"";$("bprocess").value=job.process||"";$("bcolour").value=job.colour||"";$("bthick").value=(job.thickness||"")+" µm";$("bcoc").value=job.coc||"NO";$("betch").value=job.etch||"";$("bseal").value=job.seal||"";$("blot").value=job.lot||"";$("breceived").value=job.received||"";$("bdue").value=job.due||"";$("bstatus").value="IN PRODUCTION";$("bspecial").textContent=job.special||"None";let c=$("batchParts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="card"><div class="parthead"><h2>PART ${i+1} — ${esc(p.partNo)}</h2><span class="status ${p.qc.result==="PASS"?"pass":"hold"}">${p.qc.result||"NOT PROCESSED"}</span></div><div class="parttop"><div>${img(p.image)}<p style="font-size:12px;text-align:center">Part visual reference</p></div><div class="grid3"><div><label>Part Number</label><input class="readonly" readonly value="${esc(p.partNo)}"></div><div><label>Description</label><input class="readonly" readonly value="${esc(p.description)}"></div><div><label>Material</label><input class="readonly" readonly value="${esc(p.material)}"></div><div><label>Drawing</label><input class="readonly" readonly value="${esc(p.drawing)}"></div><div><label>Revision</label><input class="readonly" readonly value="${esc(p.revision)}"></div><div><label>Quantity</label><input class="readonly" readonly value="${p.quantity}"></div><div><label>Surface Area</label><input class="readonly" readonly value="${esc(p.surfaceArea)}"></div></div></div><div class="jig"><h3>JIGGING</h3><div class="grid4"><div><label>Rack ID</label><input value="${esc(p.jig.rack)}" onchange="jig(${p.id},'rack',this.value)"></div><div><label>Jig ID</label><input value="${esc(p.jig.jig)}" onchange="jig(${p.id},'jig',this.value)"></div><div><label>Quantity Jigged</label><input type="number" value="${p.jig.qty}" onchange="jig(${p.id},'qty',Number(this.value))"></div><div><label>Operator</label><input value="${esc(p.jig.operator)}" onchange="jig(${p.id},'operator',this.value)"></div></div><br><label>Jigging Notes</label><textarea onchange="jig(${p.id},'notes',this.value)">${esc(p.jig.notes)}</textarea><div class="grid"><div><label>Jigging Reference Image</label>${img(p.jig.reference)}<input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'ref')"></div><div><label>Actual Jigged Load</label>${img(p.jig.actual)}<input type="file" accept="image/*" capture="environment" onchange="imageUpload(${p.id},this,'actual')"></div></div></div></div>`})}
-function jig(id,f,v){let p=parts.find(x=>x.id===id);p.jig[f]=v;save()}
-function renderQC(){load();$("qjob").value=job.jobNo||"";$("qpo").value=job.po||"";$("qwo").value=job.wo||"";$("qspec").value=job.spec==="OTHER"?job.specOther:job.spec||"";$("qthick").value=(job.thickness||"")+" µm";$("qcoctype").value=job.coc==="YES"?"REQUIRED":"NOT REQUIRED";let c=$("qcParts");c.innerHTML="";if(job.coc!=="YES"){c.innerHTML='<div class="notice"><b>CoC not required.</b> Normal production traceability remains in place, but no CoC dataset/certificate record is created for this job.</div>';updateStats();return}parts.forEach((p,i)=>{c.innerHTML+=`<div class="card"><h2>Part ${i+1} — ${esc(p.partNo)}</h2><div class="grid3"><div><label>Part Image</label>${img(p.image)}</div><div><label>Thickness readings (µm)</label><input placeholder="e.g. 15.2, 15.0, 15.4" value="${p.qc.readings.join(", ")}" onchange="readings(${p.id},this.value)"></div><div><label>Visual</label><select onchange="qcf(${p.id},'visual',this.value)"><option value="">Select</option><option ${p.qc.visual==="PASS"?"selected":""}>PASS</option><option ${p.qc.visual==="FAIL"?"selected":""}>FAIL</option></select></div><div><label>Seal</label><select onchange="qcf(${p.id},'seal',this.value)"><option value="">Select</option><option ${p.qc.seal==="PASS"?"selected":""}>PASS</option><option ${p.qc.seal==="FAIL"?"selected":""}>FAIL</option></select></div><div><label>Quantity Checked</label><input type="number" value="${p.qc.checked}" onchange="qcf(${p.id},'checked',Number(this.value))"></div><div><label>Quantity Passed</label><input type="number" value="${p.qc.passed}" onchange="qcf(${p.id},'passed',Number(this.value))"></div></div><br><span class="status ${p.qc.result==="PASS"?"pass":p.qc.result==="FAIL"?"fail":"hold"}">${p.qc.result}</span></div>`});updateStats()}
-function readings(id,v){let p=parts.find(x=>x.id===id);p.qc.readings=v.split(",").map(Number).filter(x=>!isNaN(x));evaluate(p);save();renderQC()}
-function qcf(id,f,v){let p=parts.find(x=>x.id===id);p.qc[f]=v;evaluate(p);save();renderQC()}
-function evaluate(p){let a=p.qc.readings.filter(x=>isFinite(x));let avg=a.length?a.reduce((x,y)=>x+y,0)/a.length:null;if(!a.length||p.qc.visual===""||p.qc.seal==="")p.qc.result="HOLD";else if(avg<job.thickness*.9||avg>job.thickness*1.1||p.qc.visual==="FAIL"||p.qc.seal==="FAIL")p.qc.result="FAIL";else if(p.qc.checked&&p.qc.passed<p.qc.checked)p.qc.result="REWORK";else p.qc.result="PASS"}
-function updateStats(){let qty=parts.reduce((a,p)=>a+Number(p.quantity||0),0),pass=parts.reduce((a,p)=>a+Number(p.qc.passed||0),0),fail=parts.reduce((a,p)=>a+Math.max(0,Number(p.qc.checked||0)-Number(p.qc.passed||0)),0);$("sparts").textContent=parts.length;$("sqty").textContent=qty;$("spass").textContent=pass;$("sfail").textContent=fail;$("batchQCStatus").innerHTML=parts.every(p=>p.qc.result==="PASS")?'<span class="status pass">BATCH PASS</span>':'<span class="status hold">BATCH NOT RELEASED</span>'}
-function renderCoC(){load();if(job.coc!=="YES"){document.querySelector("#coc .coc").innerHTML='<div class="notice"><b>No CoC dataset exists for this job.</b><br>CoC was not required at Booking In.</div>';return}$("cno").textContent="COC-"+job.jobNo;$("cjob").textContent=job.jobNo;$("ccustomer").textContent=job.customer;$("cpo").textContent=job.po||"Not supplied";$("cwo").textContent=job.wo||"Not supplied";$("cspec").textContent=job.spec==="OTHER"?job.specOther:job.spec;let t=$("cparts");t.innerHTML="";let ok=true;parts.forEach(p=>{if(p.qc.result!=="PASS")ok=false;t.innerHTML+=`<tr><td>${esc(p.partNo)}</td><td>${esc(p.description)}</td><td>${esc(p.drawing)}</td><td>${esc(p.revision)}</td><td>${esc(p.material)}</td><td>${p.quantity}</td><td><span class="status ${p.qc.result==="PASS"?"pass":"hold"}">${p.qc.result}</span></td></tr>`});$("cresult").innerHTML=ok?'<span class="status pass">BATCH PASS</span>':'<span class="status fail">BATCH NOT RELEASED — QC / REWORK REQUIRED</span>'}
-function savePartMaster(){let c=$("cmCustomer").value.trim(),p=$("cmPart").value.trim();if(!c||!p){alert("Enter customer and part number.");return}masters.push({customer:c,part:p,description:"",spec:job.spec||"",rev:job.specRev||""});save();$("cmCustomer").value="";$("cmPart").value="";renderMasters()}
-function renderMasters(){let t=$("masterRows");t.innerHTML="";masters.forEach((m,i)=>t.innerHTML+=`<tr><td>${esc(m.customer)}</td><td>${esc(m.part)}</td><td>${esc(m.description)}</td><td>${esc(m.spec)}</td><td>${esc(m.rev)}</td><td><button class="action secondary" onclick="useMaster(${i})">Use in Booking</button></td></tr>`)}
-function useMaster(i){let m=masters[i];$("customer").value=m.customer;addPart();let p=parts.at(-1);p.partNo=m.part;p.description=m.description;p.revision=m.rev;p.material="6082-T6";save();renderParts();page("booking",document.querySelector("nav button"))}
-function openModal(src){if(!src)return;$("modalImg").src=src;$("modal").classList.add("show")}
-function closeModal(){$("modal").classList.remove("show")}
-$("spec").innerHTML=SPECS.map(x=>`<option value="${esc(x[0])}">${esc(x[0])} — ${esc(x[1])}</option>`).join("");
-$("received").value=new Date().toISOString().slice(0,10);
-load();
-if(!parts.length)addPart();else renderParts();
-if(job.customer)$("customer").value=job.customer;
-if(job.po)$("po").value=job.po;
-if(job.wo)$("wo").value=job.wo;
-if(job.spec)$("spec").value=job.spec;
-if(job.specRev)$("specRev").value=job.specRev;
-if(job.thickness)$("thickness").value=job.thickness;
-if(job.coc)$("cocRequired").value=job.coc;
-specChanged();
-</script>
-</body>
-</html>
+# Part model
+html=html.replace('partNo:"",description:"",drawing:"",revision:"",material:"6082-T6",quantity:0,',
+                  'partNo:"",description:"",drawing:"",revision:"",grade:"",gradeOther:"",quantity:0,')
+
+# Part UI: replace material field
+html=html.replace(
+'''<div><label>Material</label><input value="${esc(p.material)}" onchange="setPart(${p.id},'material',this.value)"></div><div><label>Quantity</label>''',
+'''<div><label>Aluminium Grade (optional)</label><select onchange="setPart(${p.id},'grade',this.value)">${gradeOptions(p.grade)}</select></div><div><label>Quantity</label>''')
+
+# Helpers + update setter
+html=html.replace(
+'''function setPart(id,f,v){let p=parts.find(x=>x.id===id);if(p){p[f]=v;save()}}''',
+'''function gradeOptions(selected=""){return AL_GRADES.map(g=>`<option value="${esc(g[0])}" ${selected===g[0]?"selected":""}>${esc(g[1])}</option>`).join("")}
+function selectedGrade(p){return p.grade==="Other"?(p.gradeOther||"Other"):(p.grade||"Not specified")}
+function setPart(id,f,v){let p=parts.find(x=>x.id===id);if(!p)return;if(f==="grade"&&v==="Other"){let custom=prompt("Enter aluminium grade:",p.gradeOther||"");if(custom===null)return;p.gradeOther=custom.trim()}p[f]=v;save()}''')
+
+# Replace material displays globally only in template occurrences
+html=html.replace('${esc(p.material)}','${esc(selectedGrade(p))}')
+
+# Validation
+old='''let bad=parts.filter(p=>[p.partNo,p.description,p.material].every(x=>!String(x||"").trim())&&!Number(p.quantity)&&!p.drawing&&!p.image);parts=parts.filter(p=>!bad.includes(p));if(!parts.length){alert("Add at least one completed part.");return}let incomplete=parts.find(p=>!p.partNo||!p.quantity);if(incomplete){alert("Please complete the Part Number and Quantity for each part, or remove the unused part.");return}save();'''
+new='''let empty=parts.filter(p=>!String(p.partNo||"").trim()&&!String(p.description||"").trim()&&!Number(p.quantity)&&!p.drawing&&!p.image&&!String(p.surfaceArea||"").trim()&&!String(p.grade||"").trim());parts=parts.filter(p=>!empty.includes(p));if(!parts.length){alert("Add at least one part.");return}let incomplete=parts.find(p=>!String(p.partNo||"").trim()||!String(p.description||"").trim()||!Number(p.quantity));if(incomplete){let missing=[];if(!String(incomplete.partNo||"").trim())missing.push("Part Number");if(!String(incomplete.description||"").trim())missing.push("Part Name");if(!Number(incomplete.quantity))missing.push("Quantity");alert("This part is incomplete. Missing: "+missing.join(", ")+". Complete the part or remove it.");renderParts();return}save();'''
+if old not in html: print("validation pattern not found")
+html=html.replace(old,new)
+
+# Customer/parts master UI
+html=html.replace(
+'''<div class="grid"><div><label>Customer</label><input id="cmCustomer" placeholder="Customer name"></div><div><label>Part Number</label><input id="cmPart" placeholder="Customer part number"></div></div><br><button class="action primary" onclick="savePartMaster()">Save Customer Part</button>''',
+'''<div class="grid3"><div><label>Customer</label><input id="cmCustomer" placeholder="Customer name"></div><div><label>Part Number</label><input id="cmPart" placeholder="Customer part number"></div><div><label>Part Name</label><input id="cmName" placeholder="Part name"></div><div><label>Aluminium Grade (optional)</label><select id="cmGrade"></select></div><div><label>Drawing Number</label><input id="cmDrawing" placeholder="Optional"></div><div><label>Drawing Revision</label><input id="cmRevision" placeholder="Optional"></div></div><br><button class="action primary" onclick="savePartMaster()">Save Customer Part</button>''')
+html=html.replace(
+'''<table><thead><tr><th>Customer</th><th>Part</th><th>Description</th><th>Specification</th><th>Revision</th><th>Action</th></tr></thead><tbody id="masterRows"></tbody></table>''',
+'''<table><thead><tr><th>Customer</th><th>Part No.</th><th>Part Name</th><th>Aluminium Grade</th><th>Drawing</th><th>Rev</th><th>Action</th></tr></thead><tbody id="masterRows"></tbody></table>''')
+
+# Replace master functions
+s=html.index("function savePartMaster()")
+e=html.index("function openModal",s)
+master=r'''function savePartMaster(){let c=$("cmCustomer").value.trim(),pno=$("cmPart").value.trim(),name=$("cmName").value.trim();if(!c||!pno||!name){alert("Customer, Part Number and Part Name are required.");return}let grade=$("cmGrade").value,gradeOther="";if(grade==="Other")gradeOther=prompt("Enter aluminium grade:","")||"";masters.push({customer:c,part:pno,name,grade,gradeOther,drawing:$("cmDrawing").value.trim(),rev:$("cmRevision").value.trim(),spec:job.spec||"",specRev:job.specRev||"",image:""});save();$("cmCustomer").value="";$("cmPart").value="";$("cmName").value="";$("cmDrawing").value="";$("cmRevision").value="";renderMasters()}
+function renderMasters(){let t=$("masterRows");t.innerHTML="";masters.forEach((m,i)=>t.innerHTML+=`<tr><td>${esc(m.customer)}</td><td>${esc(m.part)}</td><td>${esc(m.name)}</td><td>${esc(m.grade==="Other"?(m.gradeOther||"Other"):m.grade||"Not specified")}</td><td>${esc(m.drawing)}</td><td>${esc(m.rev)}</td><td><button class="action secondary" onclick="useMaster(${i})">Use in Booking</button></td></tr>`)}
+function useMaster(i){let m=masters[i];$("customer").value=m.customer;addPart();let p=parts.at(-1);p.partNo=m.part;p.description=m.name;p.grade=m.grade||"";p.gradeOther=m.gradeOther||"";p.drawing=m.drawing||"";p.revision=m.rev||"";save();renderParts();page("booking",document.querySelector("nav button"))}
+'''
+html=html[:s]+master+html[e:]
+
+# Initialise master grade selector before spec selector
+html=html.replace('$("spec").innerHTML=SPECS.map',
+                  '$("cmGrade").innerHTML=AL_GRADES.map(x=>`<option value="${esc(x[0])}">${esc(x[1])}</option>`).join("");$("spec").innerHTML=SPECS.map')
+
+out=Path("/mnt/data/RS-Anodising-Portal-Prototype-v3.html")
+out.write_text(html,encoding="utf-8")
+print(out)
