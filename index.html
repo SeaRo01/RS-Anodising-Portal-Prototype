@@ -30,7 +30,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <button onclick="page('batch',this)">Batch Card</button>
 <button onclick="page('qc',this)">Quality Control</button>
 <button onclick="page('coc',this)">Certificate of Conformity</button>
-<button onclick="page('customers',this)">Customers / Parts</button>
+<button onclick="page('customers',this)">Customers / Parts</button><button onclick="page('pricing',this)">Pricing</button>
 </nav>
 <main class="container">
 
@@ -43,8 +43,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <div><label>Customer</label><input id="customer" value="ABC Engineering Ltd"></div>
 <div><label>Customer PO No.</label><input id="po" placeholder="Optional / customer supplied"></div>
 <div><label>Customer Works Order No.</label><input id="wo" placeholder="Optional"></div>
-<div><label>Date Received</label><input id="received" type="date" onchange="updateDueDate()"></div>
-<div><label>Service Level</label><select id="service" onchange="updateDueDate()">
+<div><label>Date Received</label><input id="received" type="date" onchange="updateDueDate();renderEstimate()"></div>
+<div><label>Service Level</label><select id="service" onchange="updateDueDate();renderEstimate()">
 <option value="STANDARD">Standard — up to 10 days</option>
 <option value="EXPRESS">Express — up to 5 days</option>
 <option value="EXPRESS PLUS">Express Plus — up to 2 days</option>
@@ -56,16 +56,26 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <div><label>Specification</label><select id="spec" onchange="specChanged()"></select></div>
 <div><label>Specification Revision / Issue</label><input id="specRev" placeholder="e.g. Issue 4 / Rev C"></div>
 <div><label>Customer Specification (if Other)</label><input id="specOther" placeholder="Shown when Other is selected" disabled></div>
-<div><label>Process</label><select id="process"><option>Type 2 Anodising</option><option>Type 3 Hard Anodising</option><option>Bright Anodising</option><option>Other</option></select></div>
-<div><label>Colour</label><select id="colour"><option>Natural</option><option>Black</option><option>Blue</option><option>Red</option><option>Green</option><option>Yellow</option><option>Other</option></select></div>
+<div><label>Process</label><select id="process" onchange="renderEstimate()"><option>Type 2 Anodising</option><option>Type 3 Hard Anodising</option><option>Bead Blasting</option><option>Bead Blast + Anodising</option><option>Stainless Steel Passivation</option><option>Strip Only</option><option>Strip & Re-anodise</option><option>Bright Anodising</option><option>Other</option></select></div>
+<div><label>Colour</label><select id="colour" onchange="renderEstimate()"><option>Natural</option><option>Black</option><option>Blue</option><option>Red</option><option>Green</option><option>Yellow</option><option>Other</option></select></div>
 <div><label>Minimum Required Coating Thickness (µm)</label><input id="thickness" type="number" value="15"></div>
-<div><label>CoC Required?</label><select id="cocRequired"><option value="YES">YES</option><option value="NO">NO</option></select></div>
-<div><label>Etch Required</label><select id="etch"><option>No</option><option>Yes</option></select></div>
+<div><label>CoC Required?</label><select id="cocRequired" onchange="renderEstimate()"><option value="YES">YES</option><option value="NO">NO</option></select></div>
+<div><label>Etch Required</label><select id="etch" onchange="renderEstimate()"><option>No</option><option>Yes</option></select></div>
 <div><label>Seal Required</label><select id="seal"><option>Yes</option><option>No</option></select></div>
 <div><label>Customer Batch / Lot No.</label><input id="lot" placeholder="Optional"></div>
 </div>
 <br><label>Customer-specific requirements / special instructions</label><textarea id="special"></textarea></div>
 
+
+<div class="card"><h2>Estimated Pricing</h2>
+<div class="notice">This is an estimate only. The calculation uses the current RS pricing settings. The final charge is confirmed by RS and saved against the job when accepted.</div>
+<div class="grid3">
+<div><label>Blind Holes — per part</label><input id="priceBlindHoles" type="number" min="0" step="1" value="0" onchange="renderEstimate()"></div>
+<div><label>Masking Required</label><select id="priceMasking" onchange="renderEstimate()"><option value="NO">No</option><option value="YES">Yes</option></select></div>
+<div><label>Brightening Required</label><select id="priceBrightening" onchange="renderEstimate()"><option value="NO">No</option><option value="YES">Yes</option></select></div>
+</div>
+<div id="estimateBox" style="margin-top:15px"></div>
+</div>
 <div class="card"><h2>Parts on this Job</h2><div id="parts"></div><button class="action secondary" onclick="addPart()">+ Add Part</button></div>
 <div class="card"><button type="button" class="action secondary" onclick="saveForLater()">Save Draft</button><button type="button" class="action primary" onclick="saveBooking()">Submit Booking</button><div id="bookingSaveStatus" style="margin-top:10px;font-weight:bold;color:#2f6f52"></div>
 <div style="margin-top:8px;font-size:12px;color:#555">
@@ -83,7 +93,7 @@ Customer: editable until RS confirmation. &nbsp;|&nbsp; RS Employee/Admin: can a
 <div class="card"><h2>Job Requirements</h2><div class="grid4">
 <div><label>Specification</label><input id="bspec" class="readonly" readonly></div><div><label>Revision</label><input id="bspecrev" class="readonly" readonly></div><div><label>Process</label><input id="bprocess" class="readonly" readonly></div><div><label>Colour</label><input id="bcolour" class="readonly" readonly></div>
 <div><label>Thickness</label><input id="bthick" class="readonly" readonly></div><div><label>CoC Required</label><input id="bcoc" class="readonly" readonly></div><div><label>Etch</label><input id="betch" class="readonly" readonly></div><div><label>Seal</label><input id="bseal" class="readonly" readonly></div>
-<div><label>Customer Batch/Lot</label><input id="blot" class="readonly" readonly></div><div><label>Service Level</label><input id="bservice" class="readonly" readonly></div><div><label>Received</label><input id="breceived" class="readonly" readonly></div><div><label>Due</label><input id="bdue" class="readonly" readonly></div><div><label>Overall Status</label><input id="bstatus" class="readonly" readonly></div>
+<div><label>Customer Batch/Lot</label><input id="blot" class="readonly" readonly></div><div><label>Service Level</label><input id="bservice" class="readonly" readonly></div><div><label>Received</label><input id="breceived" class="readonly" readonly></div><div><label>Due</label><input id="bdue" class="readonly" readonly></div><div><label>Overall Status</label><input id="bstatus" class="readonly" readonly></div><div><label>Estimated Total</label><input id="bestimate" class="readonly" readonly></div><div><label>Minimum Charge Applied</label><input id="bminapplied" class="readonly" readonly></div>
 </div><br><b>Special requirements:</b> <span id="bspecial"></span></div>
 <div id="batchParts"></div>
 </section>
@@ -101,6 +111,49 @@ Customer: editable until RS confirmation. &nbsp;|&nbsp; RS Employee/Admin: can a
 <br><div id="cresult"></div><br><button class="action primary" onclick="window.print()">Print / Save CoC</button></div>
 </section>
 
+
+<section id="pricing" class="page">
+<div class="card"><h2>Pricing & Minimum Charges</h2>
+<div class="notice"><b>Admin pricing control:</b> These are prototype pricing rules based on the current RS Anodising pricing structure supplied. Minimum charges are controlled separately for each finish/service. Changing a rate affects new estimates; historical jobs retain their saved price.</div>
+<div class="grid3">
+<div><label>Surface Area Rate (£/mm²)</label><input id="prSurface" type="number" step="0.000001" value="0.000050"></div>
+<div><label>Minimum — Standard Anodising (£)</label><input id="minStandard" type="number" step="0.01" value="80"></div>
+<div><label>Minimum — Hard Anodising (£)</label><input id="minHard" type="number" step="0.01" value="100"></div>
+<div><label>Minimum — Bead Blasting (£)</label><input id="minBlast" type="number" step="0.01" value="80"></div>
+<div><label>Minimum — Bead Blast + Anodising (£)</label><input id="minBlastAnodise" type="number" step="0.01" value="100"></div>
+<div><label>Minimum — Stainless Steel Passivation (£)</label><input id="minPassivation" type="number" step="0.01" value="80"></div>
+<div><label>Minimum — Strip Only (£)</label><input id="minStrip" type="number" step="0.01" value="80"></div>
+<div><label>Minimum — Strip & Re-anodise (£)</label><input id="minStripRe" type="number" step="0.01" value="80"></div>
+<div><label>Minimum — Other (£)</label><input id="minOther" type="number" step="0.01" value="80"></div>
+</div>
+<br>
+<h3>Percentage adjustments</h3>
+<table><thead><tr><th>Pricing factor</th><th>Adjustment</th></tr></thead>
+<tbody>
+<tr><td>Express</td><td><input id="pctExpress" type="number" step="0.1" value="25"></td></tr>
+<tr><td>Hard Anodising</td><td><input id="pctHard" type="number" step="0.1" value="100"></td></tr>
+<tr><td>Black</td><td><input id="pctBlack" type="number" step="0.1" value="5"></td></tr>
+<tr><td>Red</td><td><input id="pctRed" type="number" step="0.1" value="5"></td></tr>
+<tr><td>Green</td><td><input id="pctGreen" type="number" step="0.1" value="5"></td></tr>
+<tr><td>Gold</td><td><input id="pctGold" type="number" step="0.1" value="5"></td></tr>
+<tr><td>Blue</td><td><input id="pctBlue" type="number" step="0.1" value="5"></td></tr>
+<tr><td>30 sec Etch</td><td><input id="pctEtch30" type="number" step="0.1" value="1"></td></tr>
+<tr><td>Satin Etch 5 min</td><td><input id="pctEtch5" type="number" step="0.1" value="2"></td></tr>
+<tr><td>Matt Etch 10 min</td><td><input id="pctEtch10" type="number" step="0.1" value="3"></td></tr>
+<tr><td>Custom Etch</td><td><input id="pctEtchCustom" type="number" step="0.1" value="4"></td></tr>
+<tr><td>Brightening</td><td><input id="pctBright" type="number" step="0.1" value="25"></td></tr>
+</tbody></table>
+<br>
+<div class="grid3">
+<div><label>CoC Fixed Charge (£)</label><input id="priceCoc" type="number" step="0.01" value="5"></div>
+<div><label>Masking Fixed Charge (£)</label><input id="priceMask" type="number" step="0.01" value="1"></div>
+<div><label>Blind Hole Charge (£ each)</label><input id="priceBlind" type="number" step="0.01" value="0.10"></div>
+</div>
+<br><button class="action primary" onclick="savePricing()">Save Pricing Settings</button>
+<span id="pricingStatus" style="margin-left:10px;font-weight:bold;color:var(--gd)"></span>
+</div>
+<div class="card"><h2>Current Pricing Rules</h2><div id="pricingSummary"></div></div>
+</section>
 <section id="customers" class="page">
 <div class="card"><h2>Customer / Part Master</h2><div class="notice">This is the repeat-order library. A saved customer part can be used to pre-populate a new Booking In. Historical jobs remain unchanged if the part master is later revised.</div>
 <div class="grid3"><div><label>Customer</label><input id="cmCustomer" placeholder="Customer name"></div><div><label>Part Number</label><input id="cmPart" placeholder="Customer part number"></div><div><label>Part Name</label><input id="cmName" placeholder="Part name"></div><div><label>Aluminium Grade (optional)</label><select id="cmGrade"></select></div><div><label>Drawing Number</label><input id="cmDrawing" placeholder="Optional"></div><div><label>Drawing Revision</label><input id="cmRevision" placeholder="Optional"></div></div><br><button class="action primary" onclick="savePartMaster()">Save Customer Part</button></div>
@@ -148,13 +201,13 @@ function $(id){return document.getElementById(id)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function save(){try{localStorage.rsJob=JSON.stringify(job);localStorage.rsParts=JSON.stringify(parts);localStorage.rsMasters=JSON.stringify(masters);return true}catch(e){console.warn("Local storage save failed:",e);return false}}
 function load(){try{job=JSON.parse(localStorage.rsJob)||job;parts=JSON.parse(localStorage.rsParts)||[];masters=JSON.parse(localStorage.rsMasters)||[]}catch(e){}}
-function page(id,btn){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="batch")renderBatch();if(id==="qc")renderQC();if(id==="coc")renderCoC();if(id==="customers")renderMasters()}
+function page(id,btn){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="batch")renderBatch();if(id==="qc")renderQC();if(id==="coc")renderCoC();if(id==="customers")renderMasters();if(id==="pricing")loadPricingInputs()}
 function specChanged(){let other=$("spec").value==="OTHER";$("specOther").disabled=!other;if(!other)$("specOther").value=""}
 function addPart(){parts.push({id:Date.now(),partNo:"",description:"",drawing:"",revision:"",grade:"",gradeOther:"",quantity:0,image:"",surfaceArea:"",jig:{rack:"",jig:"",qty:0,operator:"",notes:"",reference:"",actual:""},qc:{readings:[],visual:"",seal:"",checked:0,passed:0,result:"HOLD"}});renderParts()}
 function removePart(id){parts=parts.filter(p=>p.id!==id);renderParts();save()}
 function gradeOptions(selected=""){return AL_GRADES.map(g=>`<option value="${esc(g[0])}" ${selected===g[0]?"selected":""}>${esc(g[1])}</option>`).join("")}
 function selectedGrade(p){return p.grade==="Other"?(p.gradeOther||"Other"):(p.grade||"Not specified")}
-function setPart(id,f,v){let p=parts.find(x=>x.id===id);if(!p)return;if(f==="grade"&&v==="Other"){let custom=prompt("Enter aluminium grade:",p.gradeOther||"");if(custom===null)return;p.gradeOther=custom.trim()}p[f]=v;save()}
+function setPart(id,f,v){let p=parts.find(x=>x.id===id);if(!p)return;if(f==="grade"&&v==="Other"){let custom=prompt("Enter aluminium grade:",p.gradeOther||"");if(custom===null)return;p.gradeOther=custom.trim()}p[f]=v;save();if(f==="quantity"||f==="surfaceArea")renderEstimate()}
 function imageUpload(id,input,type){
   const f=input.files && input.files[0];
   if(!f)return;
@@ -184,7 +237,24 @@ function imageUpload(id,input,type){
   r.readAsDataURL(f);
 }
 function img(src,cls="thumb"){return src?`<div class="${cls}" onclick="openModal('${src}')"><img src="${src}"></div>`:`<div class="${cls}">No image uploaded</div>`}
-function renderParts(){let c=$("parts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="part"><div class="parthead"><h3>Part ${i+1}</h3><button class="action danger" onclick="removePart(${p.id})">Remove</button></div><div class="parttop"><div>${img(p.image)}<br><label>Part Image</label><input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'part')"></div><div class="grid3"><div><label>Part Number</label><input value="${esc(p.partNo)}" onchange="setPart(${p.id},'partNo',this.value)"></div><div><label>Description</label><input value="${esc(p.description)}" onchange="setPart(${p.id},'description',this.value)"></div><div><label>Drawing</label><input value="${esc(p.drawing)}" onchange="setPart(${p.id},'drawing',this.value)"></div><div><label>Drawing Revision</label><input value="${esc(p.revision)}" onchange="setPart(${p.id},'revision',this.value)"></div><div><label>Aluminium Grade (optional)</label><select onchange="setPart(${p.id},'grade',this.value)">${gradeOptions(p.grade)}</select></div><div><label>Quantity</label><input type="number" value="${p.quantity}" onchange="setPart(${p.id},'quantity',Number(this.value))"></div><div><label>Surface Area (mm²)</label><input value="${esc(p.surfaceArea)}" onchange="setPart(${p.id},'surfaceArea',this.value)"></div></div></div></div>`})}
+function renderParts(){
+ let c=$("parts");c.innerHTML="";
+ const role=$("userRole").value;
+ parts.forEach((p,i)=>{
+   const imageBlock=role==="CUSTOMER"?"":`<div>${img(p.image)}<br><label>RS Part Image</label><input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'part')"></div>`;
+   c.innerHTML+=`<div class="part"><div class="parthead"><h3>Part ${i+1}</h3><button class="action danger" onclick="removePart(${p.id})">Remove</button></div>
+   <div class="parttop">${imageBlock}<div class="grid3">
+   <div><label>Part Number</label><input value="${esc(p.partNo)}" onchange="setPart(${p.id},'partNo',this.value)"></div>
+   <div><label>Part Name</label><input value="${esc(p.description)}" onchange="setPart(${p.id},'description',this.value)"></div>
+   <div><label>Drawing</label><input value="${esc(p.drawing)}" onchange="setPart(${p.id},'drawing',this.value)"></div>
+   <div><label>Drawing Revision</label><input value="${esc(p.revision)}" onchange="setPart(${p.id},'revision',this.value)"></div>
+   <div><label>Aluminium Grade (optional)</label><select onchange="setPart(${p.id},'grade',this.value)">${gradeOptions(p.grade)}</select></div>
+   <div><label>Quantity</label><input type="number" min="1" value="${p.quantity||0}" onchange="setPart(${p.id},'quantity',Number(this.value));renderEstimate()"></div>
+   <div><label>Surface Area (mm²)</label><input value="${esc(p.surfaceArea)}" onchange="setPart(${p.id},'surfaceArea',this.value);renderEstimate()"></div>
+   </div></div></div>`
+ });
+ applyPermissions();renderEstimate();
+}
 function addCalendarDays(dateString, days){
   if(!dateString)return "";
   const d=new Date(dateString+"T00:00:00");
@@ -205,7 +275,10 @@ function canEditBooking(){
   return role==="CUSTOMER" && status==="AWAITING CONFIRMATION";
 }
 function setRole(role){
-  $("currentUser").value=roleName(role);
+  $("currentUser").value=roleName(role);renderParts();renderEstimate();
+  const pricingBtn=[...document.querySelectorAll("nav button")].find(b=>b.textContent==="Pricing");
+  if(pricingBtn)pricingBtn.style.display=role==="CUSTOMER"?"none":"";
+
   applyPermissions();
 }
 function setBookingStatus(status){
@@ -268,13 +341,114 @@ function renderAudit(){
   (job.audit||[]).slice().reverse().forEach(a=>t.innerHTML+=`<tr><td>${esc(a.time)}</td><td>${esc(a.user)}</td><td>${esc(a.role)}</td><td>${esc(a.action)}</td><td>${esc(a.field)}</td><td>${esc(a.previous)}</td><td>${esc(a.value)}</td></tr>`);
 }
 function confirmBooking(){confirmRSBooking()}
+
+const DEFAULT_PRICING={
+ surface:0.000050,
+ minimums:{standard:80,hard:100,blast:80,blastAnodise:100,passivation:80,strip:80,stripRe:80,other:80},
+ pct:{express:25,hard:100,black:5,red:5,green:5,gold:5,blue:5,etch30:1,etch5:2,etch10:3,etchCustom:4,bright:25},
+ fixed:{coc:5,mask:1,blind:0.10}
+};
+let pricing=JSON.parse(JSON.stringify(DEFAULT_PRICING));
+function loadPricing(){try{pricing=JSON.parse(localStorage.rsPricing)||JSON.parse(JSON.stringify(DEFAULT_PRICING))}catch(e){}}
+function savePricing(){
+ pricing.surface=Number($("prSurface").value)||0;
+ pricing.minimums={standard:Number($("minStandard").value)||0,hard:Number($("minHard").value)||0,blast:Number($("minBlast").value)||0,blastAnodise:Number($("minBlastAnodise").value)||0,passivation:Number($("minPassivation").value)||0,strip:Number($("minStrip").value)||0,stripRe:Number($("minStripRe").value)||0,other:Number($("minOther").value)||0};
+ pricing.pct={express:Number($("pctExpress").value)||0,hard:Number($("pctHard").value)||0,black:Number($("pctBlack").value)||0,red:Number($("pctRed").value)||0,green:Number($("pctGreen").value)||0,gold:Number($("pctGold").value)||0,blue:Number($("pctBlue").value)||0,etch30:Number($("pctEtch30").value)||0,etch5:Number($("pctEtch5").value)||0,etch10:Number($("pctEtch10").value)||0,etchCustom:Number($("pctEtchCustom").value)||0,bright:Number($("pctBright").value)||0};
+ pricing.fixed={coc:Number($("priceCoc").value)||0,mask:Number($("priceMask").value)||0,blind:Number($("priceBlind").value)||0};
+ localStorage.rsPricing=JSON.stringify(pricing);
+ $("pricingStatus").textContent="Pricing settings saved.";
+ renderPricingSummary();renderEstimate();
+}
+function pricingProcessKey(){
+ const v=($("process").value||"").toLowerCase();
+ if(v.includes("hard"))return "hard";
+ if(v.includes("bead")&&v.includes("anodis"))return "blastAnodise";
+ if(v.includes("bead"))return "blast";
+ if(v.includes("passiv"))return "passivation";
+ if(v.includes("strip")&&v.includes("re"))return "stripRe";
+ if(v.includes("strip"))return "strip";
+ return "standard";
+}
+function processLabel(){return $("process").value||"Standard Anodising"}
+function pricingMin(){return Number(pricing.minimums[pricingProcessKey()]||pricing.minimums.other||0)}
+function pctFactors(){
+ let p=0, names=[];
+ const process=pricingProcessKey();
+ if(process==="hard"){p+=pricing.pct.hard;names.push(["Hard Anodising",pricing.pct.hard])}
+ const colour=($("colour").value||"").toLowerCase();
+ const cmap={black:"black",red:"red",green:"green",gold:"gold",blue:"blue"};
+ if(cmap[colour]){let x=pricing.pct[cmap[colour]]||0;p+=x;names.push([$("colour").value,x])}
+ const et=($("etch").value||"").toLowerCase();
+ if(et.includes("30")){p+=pricing.pct.etch30;names.push(["30 sec Etch",pricing.pct.etch30])}
+ else if(et.includes("5")){p+=pricing.pct.etch5;names.push(["Satin Etch 5 min",pricing.pct.etch5])}
+ else if(et.includes("10")){p+=pricing.pct.etch10;names.push(["Matt Etch 10 min",pricing.pct.etch10])}
+ else if(et.includes("custom")){p+=pricing.pct.etchCustom;names.push(["Custom Etch",pricing.pct.etchCustom])}
+ if($("priceBrightening")&&$("priceBrightening").value==="YES"){p+=pricing.pct.bright;names.push(["Brightening",pricing.pct.bright])}
+ if(($("service").value||"")!=="STANDARD"){p+=pricing.pct.express;names.push(["Express service",pricing.pct.express])}
+ return {percent:p,names};
+}
+function calculateEstimate(){
+ let qty=parts.reduce((n,p)=>n+Number(p.quantity||0),0);
+ let area=parts.reduce((n,p)=>n+(Number(p.surfaceArea)||0)*Number(p.quantity||0),0);
+ const base=area*pricing.surface;
+ const pf=pctFactors();
+ const adjusted=base*(1+pf.percent/100);
+ const fixed=(($("cocRequired").value==="YES")?pricing.fixed.coc:0)+
+   (($("priceMasking")&&$("priceMasking").value==="YES")?pricing.fixed.mask:0)+
+   (Number($("priceBlindHoles")&&$("priceBlindHoles").value||0)*pricing.fixed.blind*Math.max(qty,1));
+ const calculated=adjusted+fixed;
+ const min=pricingMin();
+ const final=Math.max(calculated,min);
+ const minApplied=calculated<min;
+ const unit=qty?final/qty:0;
+ return {qty,area,base,percent:pf.percent,percentNames:pf.names,fixed,calculated,min,final,unit,minApplied};
+}
+function renderEstimate(){
+ const box=$("estimateBox");if(!box)return;
+ const x=calculateEstimate();
+ if(!x.qty||!x.area){box.innerHTML='<div class="notice">Enter quantity and surface area for at least one part to calculate an estimate.</div>';return}
+ box.innerHTML=`<div class="grid4">
+ <div class="stat">Total Quantity<strong>${x.qty}</strong></div>
+ <div class="stat">Surface Area<strong>${x.area.toFixed(0)} mm²</strong></div>
+ <div class="stat">Calculated Job Price<strong>£${x.calculated.toFixed(2)}</strong></div>
+ <div class="stat">Minimum Charge<strong>£${x.min.toFixed(2)}</strong></div>
+ </div>
+ <div class="card" style="margin-top:12px;margin-bottom:0"><table>
+ <tr><th>Process</th><td>${esc(processLabel())}</td></tr>
+ <tr><th>Base surface-area price</th><td>£${x.base.toFixed(2)}</td></tr>
+ <tr><th>Percentage adjustments</th><td>${x.percentNames.length?x.percentNames.map(a=>esc(a[0])+" +"+a[1]+"%").join(", ")+" — Total +"+x.percent.toFixed(1)+"%":"None"}</td></tr>
+ <tr><th>Fixed charges</th><td>£${x.fixed.toFixed(2)}</td></tr>
+ <tr><th>Minimum charge</th><td>£${x.min.toFixed(2)}</td></tr>
+ <tr><th><b>Estimated total</b></th><td><b>£${x.final.toFixed(2)}</b></td></tr>
+ <tr><th>Estimated price per part</th><td><b>£${x.unit.toFixed(2)}</b></td></tr>
+ ${x.minApplied?'<tr><th colspan="2"><span class="status hold">MINIMUM CHARGE APPLIES</span></th></tr>':''}
+ </table></div>`;
+}
+function renderPricingSummary(){
+ const box=$("pricingSummary");if(!box)return;
+ const rows=[
+ ["Standard Anodising",pricing.minimums.standard],["Hard Anodising",pricing.minimums.hard],
+ ["Bead Blasting",pricing.minimums.blast],["Bead Blast + Anodising",pricing.minimums.blastAnodise],
+ ["Stainless Steel Passivation",pricing.minimums.passivation],["Strip Only",pricing.minimums.strip],
+ ["Strip & Re-anodise",pricing.minimums.stripRe],["Other",pricing.minimums.other]
+ ];
+ box.innerHTML=`<table><thead><tr><th>Service</th><th>Minimum Charge</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>£${Number(r[1]).toFixed(2)}</td></tr>`).join("")}</tbody></table>`;
+}
+function loadPricingInputs(){
+ loadPricing();
+ $("prSurface").value=pricing.surface;
+ $("minStandard").value=pricing.minimums.standard;$("minHard").value=pricing.minimums.hard;$("minBlast").value=pricing.minimums.blast;$("minBlastAnodise").value=pricing.minimums.blastAnodise;$("minPassivation").value=pricing.minimums.passivation;$("minStrip").value=pricing.minimums.strip;$("minStripRe").value=pricing.minimums.stripRe;$("minOther").value=pricing.minimums.other;
+ $("pctExpress").value=pricing.pct.express;$("pctHard").value=pricing.pct.hard;$("pctBlack").value=pricing.pct.black;$("pctRed").value=pricing.pct.red;$("pctGreen").value=pricing.pct.green;$("pctGold").value=pricing.pct.gold;$("pctBlue").value=pricing.pct.blue;$("pctEtch30").value=pricing.pct.etch30;$("pctEtch5").value=pricing.pct.etch5;$("pctEtch10").value=pricing.pct.etch10;$("pctEtchCustom").value=pricing.pct.etchCustom;$("pctBright").value=pricing.pct.bright;
+ $("priceCoc").value=pricing.fixed.coc;$("priceMask").value=pricing.fixed.mask;$("priceBlind").value=pricing.fixed.blind;
+ renderPricingSummary();
+}
 function saveBooking(){
   if(!canEditBooking()){
       alert("This booking is locked for the customer. RS employees and Admin can amend confirmed bookings.");
       return false;
     }
   const before={...job};
-  job={...job,jobNo:$("jobNo").value.trim(),customer:$("customer").value.trim(),po:$("po").value.trim(),wo:$("wo").value.trim(),received:$("received").value,due:$("due").value,service:$("service").value,spec:$("spec").value,specOther:$("specOther").value.trim(),specRev:$("specRev").value.trim(),process:$("process").value,colour:$("colour").value,thickness:Number($("thickness").value),coc:$("cocRequired").value,etch:$("etch").value,seal:$("seal").value,lot:$("lot").value.trim(),special:$("special").value,status:"AWAITING CONFIRMATION"};
+  job={...job,jobNo:$("jobNo").value.trim(),customer:$("customer").value.trim(),po:$("po").value.trim(),wo:$("wo").value.trim(),received:$("received").value,due:$("due").value,service:$("service").value,spec:$("spec").value,specOther:$("specOther").value.trim(),specRev:$("specRev").value.trim(),process:$("process").value,colour:$("colour").value,thickness:Number($("thickness").value),coc:$("cocRequired").value,etch:$("etch").value,seal:$("seal").value,lot:$("lot").value.trim(),special:$("special").value,status:"AWAITING CONFIRMATION",estimate:calculateEstimate(),pricingSnapshot:JSON.parse(JSON.stringify(pricing))};
   const tracked=[["Customer","customer"],["Customer PO","po"],["Works Order","wo"],["Date Received","received"],["Service Level","service"],["Specification","spec"],["Specification Revision","specRev"],["Process","process"],["Colour","colour"],["Minimum Thickness","thickness"],["CoC Required","coc"],["Etch","etch"],["Seal","seal"],["Due Date","due"]];
   tracked.forEach(([label,key])=>{
     if(String(before[key]??"")!==String(job[key]??"")){
@@ -310,7 +484,7 @@ function saveBooking(){
   $("batch").classList.add("active");
   return true;
 }
-function renderBatch(){load();$("bjob").textContent=job.jobNo||"";$("bcustomer").textContent=job.customer||"";$("bpo").textContent=job.po||"Not supplied";$("bwo").textContent=job.wo||"Not supplied";$("bspec").value=job.spec==="OTHER"?job.specOther:job.spec||"";$("bspecrev").value=job.specRev||"";$("bprocess").value=job.process||"";$("bcolour").value=job.colour||"";$("bthick").value=(job.thickness||"")+" µm";$("bcoc").value=job.coc||"NO";$("betch").value=job.etch||"";$("bseal").value=job.seal||"";$("blot").value=job.lot||"";$("bservice").value=job.service||"STANDARD";$("breceived").value=job.received||"";$("bdue").value=job.due||"";$("bstatus").value="IN PRODUCTION";$("bspecial").textContent=job.special||"None";let c=$("batchParts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="card"><div class="parthead"><h2>PART ${i+1} — ${esc(p.partNo)}</h2><span class="status ${p.qc.result==="PASS"?"pass":"hold"}">${p.qc.result||"NOT PROCESSED"}</span></div><div class="parttop"><div>${img(p.image)}<p style="font-size:12px;text-align:center">Part visual reference</p></div><div class="grid3"><div><label>Part Number</label><input class="readonly" readonly value="${esc(p.partNo)}"></div><div><label>Description</label><input class="readonly" readonly value="${esc(p.description)}"></div><div><label>Material</label><input class="readonly" readonly value="${esc(selectedGrade(p))}"></div><div><label>Drawing</label><input class="readonly" readonly value="${esc(p.drawing)}"></div><div><label>Revision</label><input class="readonly" readonly value="${esc(p.revision)}"></div><div><label>Quantity</label><input class="readonly" readonly value="${p.quantity}"></div><div><label>Surface Area</label><input class="readonly" readonly value="${esc(p.surfaceArea)}"></div></div></div><div class="jig"><h3>JIGGING</h3><div class="grid4"><div><label>Rack ID</label><input value="${esc(p.jig.rack)}" onchange="jig(${p.id},'rack',this.value)"></div><div><label>Jig ID</label><input value="${esc(p.jig.jig)}" onchange="jig(${p.id},'jig',this.value)"></div><div><label>Quantity Jigged</label><input type="number" value="${p.jig.qty}" onchange="jig(${p.id},'qty',Number(this.value))"></div><div><label>Operator</label><input value="${esc(p.jig.operator)}" onchange="jig(${p.id},'operator',this.value)"></div></div><br><label>Jigging Notes</label><textarea onchange="jig(${p.id},'notes',this.value)">${esc(p.jig.notes)}</textarea><div class="grid"><div><label>Jigging Reference Image</label>${img(p.jig.reference)}<input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'ref')"></div><div><label>Actual Jigged Load</label>${img(p.jig.actual)}<input type="file" accept="image/*" capture="environment" onchange="imageUpload(${p.id},this,'actual')"></div></div></div></div>`})}
+function renderBatch(){load();$("bjob").textContent=job.jobNo||"";$("bcustomer").textContent=job.customer||"";$("bpo").textContent=job.po||"Not supplied";$("bwo").textContent=job.wo||"Not supplied";$("bspec").value=job.spec==="OTHER"?job.specOther:job.spec||"";$("bspecrev").value=job.specRev||"";$("bprocess").value=job.process||"";$("bcolour").value=job.colour||"";$("bthick").value=(job.thickness||"")+" µm";$("bcoc").value=job.coc||"NO";$("betch").value=job.etch||"";$("bseal").value=job.seal||"";$("blot").value=job.lot||"";$("bservice").value=job.service||"STANDARD";$("breceived").value=job.received||"";$("bdue").value=job.due||"";$("bstatus").value="IN PRODUCTION";$("bestimate").value=job.estimate?"£"+Number(job.estimate.final||0).toFixed(2):"—";$("bminapplied").value=job.estimate&&job.estimate.minApplied?"YES — MINIMUM CHARGE APPLIES":"NO";$("bspecial").textContent=job.special||"None";let c=$("batchParts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="card"><div class="parthead"><h2>PART ${i+1} — ${esc(p.partNo)}</h2><span class="status ${p.qc.result==="PASS"?"pass":"hold"}">${p.qc.result||"NOT PROCESSED"}</span></div><div class="parttop"><div>${img(p.image)}<p style="font-size:12px;text-align:center">Part visual reference</p></div><div class="grid3"><div><label>Part Number</label><input class="readonly" readonly value="${esc(p.partNo)}"></div><div><label>Description</label><input class="readonly" readonly value="${esc(p.description)}"></div><div><label>Material</label><input class="readonly" readonly value="${esc(selectedGrade(p))}"></div><div><label>Drawing</label><input class="readonly" readonly value="${esc(p.drawing)}"></div><div><label>Revision</label><input class="readonly" readonly value="${esc(p.revision)}"></div><div><label>Quantity</label><input class="readonly" readonly value="${p.quantity}"></div><div><label>Surface Area</label><input class="readonly" readonly value="${esc(p.surfaceArea)}"></div></div></div><div class="jig"><h3>JIGGING</h3><div class="grid4"><div><label>Rack ID</label><input value="${esc(p.jig.rack)}" onchange="jig(${p.id},'rack',this.value)"></div><div><label>Jig ID</label><input value="${esc(p.jig.jig)}" onchange="jig(${p.id},'jig',this.value)"></div><div><label>Quantity Jigged</label><input type="number" value="${p.jig.qty}" onchange="jig(${p.id},'qty',Number(this.value))"></div><div><label>Operator</label><input value="${esc(p.jig.operator)}" onchange="jig(${p.id},'operator',this.value)"></div></div><br><label>Jigging Notes</label><textarea onchange="jig(${p.id},'notes',this.value)">${esc(p.jig.notes)}</textarea><div class="grid"><div><label>Jigging Reference Image</label>${img(p.jig.reference)}<input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'ref')"></div><div><label>Actual Jigged Load</label>${img(p.jig.actual)}<input type="file" accept="image/*" capture="environment" onchange="imageUpload(${p.id},this,'actual')"></div></div></div></div>`})}
 function jig(id,f,v){let p=parts.find(x=>x.id===id);p.jig[f]=v;save()}
 function readingInputs(p){
   if(!Array.isArray(p.qc.readings))p.qc.readings=[];
@@ -332,6 +506,7 @@ function closeModal(){$("modal").classList.remove("show")}
 $("cmGrade").innerHTML=AL_GRADES.map(x=>`<option value="${esc(x[0])}">${esc(x[1])}</option>`).join("");$("spec").innerHTML=SPECS.map(x=>`<option value="${esc(x[0])}">${esc(x[0])} — ${esc(x[1])}</option>`).join("");
 $("received").value=new Date().toISOString().slice(0,10);
 load();
+loadPricingInputs();
 $("userRole").value=job.lastRole||"ADMIN";
 $("bookingStatus").value=job.status||"AWAITING CONFIRMATION";
 $("currentUser").value=roleName($("userRole").value);
@@ -345,7 +520,7 @@ if(job.thickness)$("thickness").value=job.thickness;
 if(job.coc)$("cocRequired").value=job.coc;
 if(job.service)$("service").value=job.service;
 updateDueDate();
-specChanged();renderAudit();renderDrafts();applyPermissions();
+specChanged();renderAudit();renderDrafts();applyPermissions();renderEstimate();
 </script>
 </body>
 </html>
