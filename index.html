@@ -24,7 +24,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 </style>
 </head>
 <body>
-<header><div><h1>RS Anodising</h1><small>Production & Traceability Portal</small></div><small>DEVELOPMENT PROTOTYPE</small></header>
+<header><div><h1>RS Anodising</h1><small>Production & Traceability Portal</small></div><div style="text-align:right"><small>Signed in as</small><br><select id="userRole" onchange="setRole(this.value)" style="padding:5px;border-radius:4px"><option value="ADMIN">Admin</option><option value="EMPLOYEE">Employee</option><option value="CUSTOMER">Customer</option></select></div></header>
 <nav>
 <button class="active" onclick="page('booking',this)">Booking In</button>
 <button onclick="page('batch',this)">Batch Card</button>
@@ -35,14 +35,21 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <main class="container">
 
 <section id="booking" class="page active">
-<div class="notice"><b>Booking In:</b> the RS Job / Order No. is the master job reference. Customer PO, Works Order, specification and part information are copied into the job record.</div>
-<div class="card"><h2>Job / Customer</h2><div class="grid">
+<div class="notice"><b>Booking In:</b> the RS Job / Order No. is the master job reference. Service level automatically sets the target due date. Customers submit bookings for RS confirmation. Customer PO, Works Order, specification and part information are copied into the job record.</div>
+<div class="notice"><b>Permission rule:</b> Confirmed bookings are locked for the customer. RS employees and Admin can still amend the booking, and amendments are recorded in the audit log.</div><div class="card"><h2>Job / Customer</h2><div class="grid">
+<div><label>Booking Status</label><select id="bookingStatus" onchange="setBookingStatus(this.value)"><option value="AWAITING CONFIRMATION">Awaiting Confirmation</option><option value="CONFIRMED">Confirmed</option><option value="IN PRODUCTION">In Production</option><option value="COMPLETED">Completed</option><option value="DISPATCHED">Dispatched</option></select></div>
+<div><label>Current User</label><input id="currentUser" class="readonly" readonly value="Admin"></div>
 <div><label>RS Job / Order No.</label><input id="jobNo" class="readonly" value="ORD100001768" readonly></div>
 <div><label>Customer</label><input id="customer" value="ABC Engineering Ltd"></div>
 <div><label>Customer PO No.</label><input id="po" placeholder="Optional / customer supplied"></div>
 <div><label>Customer Works Order No.</label><input id="wo" placeholder="Optional"></div>
-<div><label>Date Received</label><input id="received" type="date"></div>
-<div><label>Required Completion Date</label><input id="due" type="date"></div>
+<div><label>Date Received</label><input id="received" type="date" onchange="updateDueDate()"></div>
+<div><label>Service Level</label><select id="service" onchange="updateDueDate()">
+<option value="STANDARD">Standard — up to 10 days</option>
+<option value="EXPRESS">Express — up to 5 days</option>
+<option value="EXPRESS PLUS">Express Plus — up to 2 days</option>
+</select></div>
+<div><label>Calculated Due Date</label><input id="due" type="date" class="readonly" readonly></div>
 </div></div>
 
 <div class="card"><h2>Process & Specification</h2><div class="grid3">
@@ -60,7 +67,13 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <br><label>Customer-specific requirements / special instructions</label><textarea id="special"></textarea></div>
 
 <div class="card"><h2>Parts on this Job</h2><div id="parts"></div><button class="action secondary" onclick="addPart()">+ Add Part</button></div>
-<div class="card"><button type="button" class="action primary" onclick="saveBooking()">Save Booking / Open Batch Card</button><div id="bookingSaveStatus" style="margin-top:10px;font-weight:bold;color:#2f6f52"></div></div>
+<div class="card"><button type="button" class="action secondary" onclick="saveForLater()">Save Draft</button><button type="button" class="action primary" onclick="saveBooking()">Submit Booking</button><div id="bookingSaveStatus" style="margin-top:10px;font-weight:bold;color:#2f6f52"></div>
+<div style="margin-top:8px;font-size:12px;color:#555">
+Customer: editable until RS confirmation. &nbsp;|&nbsp; RS Employee/Admin: can amend after confirmation; changes are audited.
+</div>
+<div id="rsConfirmArea" style="margin-top:12px"></div></div>
+<div class="card"><h2>Saved Drafts / Continue Later</h2><div class="notice">A customer can save an unfinished booking and return to it later without losing the information already entered. Drafts remain editable until submitted for confirmation.</div><table><thead><tr><th>Saved</th><th>Customer</th><th>RS Job</th><th>Parts</th><th>Service</th><th>Status</th><th>Action</th></tr></thead><tbody id="draftRows"></tbody></table></div>
+<div class="card"><h2>Audit Log</h2><table><thead><tr><th>Date / Time</th><th>User</th><th>Role</th><th>Action</th><th>Field</th><th>Previous</th><th>New</th></tr></thead><tbody id="auditRows"></tbody></table></div>
 </section>
 
 <section id="batch" class="page">
@@ -70,7 +83,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <div class="card"><h2>Job Requirements</h2><div class="grid4">
 <div><label>Specification</label><input id="bspec" class="readonly" readonly></div><div><label>Revision</label><input id="bspecrev" class="readonly" readonly></div><div><label>Process</label><input id="bprocess" class="readonly" readonly></div><div><label>Colour</label><input id="bcolour" class="readonly" readonly></div>
 <div><label>Thickness</label><input id="bthick" class="readonly" readonly></div><div><label>CoC Required</label><input id="bcoc" class="readonly" readonly></div><div><label>Etch</label><input id="betch" class="readonly" readonly></div><div><label>Seal</label><input id="bseal" class="readonly" readonly></div>
-<div><label>Customer Batch/Lot</label><input id="blot" class="readonly" readonly></div><div><label>Received</label><input id="breceived" class="readonly" readonly></div><div><label>Due</label><input id="bdue" class="readonly" readonly></div><div><label>Overall Status</label><input id="bstatus" class="readonly" readonly></div>
+<div><label>Customer Batch/Lot</label><input id="blot" class="readonly" readonly></div><div><label>Service Level</label><input id="bservice" class="readonly" readonly></div><div><label>Received</label><input id="breceived" class="readonly" readonly></div><div><label>Due</label><input id="bdue" class="readonly" readonly></div><div><label>Overall Status</label><input id="bstatus" class="readonly" readonly></div>
 </div><br><b>Special requirements:</b> <span id="bspecial"></span></div>
 <div id="batchParts"></div>
 </section>
@@ -172,8 +185,102 @@ function imageUpload(id,input,type){
 }
 function img(src,cls="thumb"){return src?`<div class="${cls}" onclick="openModal('${src}')"><img src="${src}"></div>`:`<div class="${cls}">No image uploaded</div>`}
 function renderParts(){let c=$("parts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="part"><div class="parthead"><h3>Part ${i+1}</h3><button class="action danger" onclick="removePart(${p.id})">Remove</button></div><div class="parttop"><div>${img(p.image)}<br><label>Part Image</label><input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'part')"></div><div class="grid3"><div><label>Part Number</label><input value="${esc(p.partNo)}" onchange="setPart(${p.id},'partNo',this.value)"></div><div><label>Description</label><input value="${esc(p.description)}" onchange="setPart(${p.id},'description',this.value)"></div><div><label>Drawing</label><input value="${esc(p.drawing)}" onchange="setPart(${p.id},'drawing',this.value)"></div><div><label>Drawing Revision</label><input value="${esc(p.revision)}" onchange="setPart(${p.id},'revision',this.value)"></div><div><label>Aluminium Grade (optional)</label><select onchange="setPart(${p.id},'grade',this.value)">${gradeOptions(p.grade)}</select></div><div><label>Quantity</label><input type="number" value="${p.quantity}" onchange="setPart(${p.id},'quantity',Number(this.value))"></div><div><label>Surface Area (mm²)</label><input value="${esc(p.surfaceArea)}" onchange="setPart(${p.id},'surfaceArea',this.value)"></div></div></div></div>`})}
+function addCalendarDays(dateString, days){
+  if(!dateString)return "";
+  const d=new Date(dateString+"T00:00:00");
+  d.setDate(d.getDate()+Number(days));
+  return d.toISOString().slice(0,10);
+}
+function updateDueDate(){
+  const received=$("received").value;
+  const service=$("service").value;
+  const days=service==="EXPRESS PLUS"?2:service==="EXPRESS"?5:10;
+  $("due").value=addCalendarDays(received,days);
+}
+function roleName(r){return r==="ADMIN"?"Admin":r==="EMPLOYEE"?"Employee":"Customer"}
+function canEditBooking(){
+  const role=$("userRole").value;
+  const status=$("bookingStatus").value;
+  if(role==="ADMIN"||role==="EMPLOYEE")return true;
+  return role==="CUSTOMER" && status==="AWAITING CONFIRMATION";
+}
+function setRole(role){
+  $("currentUser").value=roleName(role);
+  applyPermissions();
+}
+function setBookingStatus(status){
+  job.status=status;
+  save();
+  applyPermissions();
+  renderAudit();
+}
+function applyPermissions(){
+  const role=$("userRole").value;
+  const status=$("bookingStatus").value;
+
+  // Customers can edit only while awaiting confirmation.
+  // Employees/Admins can amend bookings at any stage where the portal allows it.
+  const editable=(role==="ADMIN"||role==="EMPLOYEE") ||
+                 (role==="CUSTOMER" && status==="AWAITING CONFIRMATION");
+
+  const ids=["bookingStatus","customer","po","wo","received","service","spec",
+    "specRev","specOther","process","colour","thickness","cocRequired",
+    "etch","seal","lot","special"];
+
+  ids.forEach(id=>{
+    if($(id)) $(id).disabled=!editable;
+  });
+
+  document.querySelectorAll("#parts input,#parts select,#parts textarea")
+    .forEach(el=>el.disabled=!editable);
+
+  renderRSConfirm();
+}
+function renderRSConfirm(){
+  const area=$("rsConfirmArea"); if(!area)return;
+  const role=$("userRole").value;
+  const status=$("bookingStatus").value;
+  if((role==="ADMIN"||role==="EMPLOYEE") && status==="AWAITING CONFIRMATION"){
+    area.innerHTML='<button type="button" class="action success" onclick="confirmRSBooking()">RS Confirm Booking</button><div style="margin-top:6px;font-size:12px;color:#555">This confirms receipt/acceptance of the booking and locks the customer booking details.</div>';
+  }else if(status==="CONFIRMED"){
+    area.innerHTML='<span class="status pass">BOOKING CONFIRMED — CUSTOMER DETAILS LOCKED</span>';
+  }else{
+    area.innerHTML="";
+  }
+}
+function confirmRSBooking(){
+  const role=$("userRole").value;
+  if(role!=="ADMIN"&&role!=="EMPLOYEE"){alert("Only RS employees or Admin can confirm a booking.");return}
+  const old=$("bookingStatus").value;
+  $("bookingStatus").value="CONFIRMED";
+  job.status="CONFIRMED";
+  audit("Booking confirmed","Booking Status",old,"CONFIRMED");
+  applyPermissions();
+  save();
+}
+function audit(action,field,previous,value){
+  if(!job.audit)job.audit=[];
+  job.audit.push({time:new Date().toLocaleString("en-GB"),user:roleName($("userRole").value),role:roleName($("userRole").value),action,field,previous:previous??"",value:value??""});
+  save();renderAudit();
+}
+function renderAudit(){
+  const t=$("auditRows");if(!t)return;t.innerHTML="";
+  (job.audit||[]).slice().reverse().forEach(a=>t.innerHTML+=`<tr><td>${esc(a.time)}</td><td>${esc(a.user)}</td><td>${esc(a.role)}</td><td>${esc(a.action)}</td><td>${esc(a.field)}</td><td>${esc(a.previous)}</td><td>${esc(a.value)}</td></tr>`);
+}
+function confirmBooking(){confirmRSBooking()}
 function saveBooking(){
-  job={...job,jobNo:$("jobNo").value.trim(),customer:$("customer").value.trim(),po:$("po").value.trim(),wo:$("wo").value.trim(),received:$("received").value,due:$("due").value,spec:$("spec").value,specOther:$("specOther").value.trim(),specRev:$("specRev").value.trim(),process:$("process").value,colour:$("colour").value,thickness:Number($("thickness").value),coc:$("cocRequired").value,etch:$("etch").value,seal:$("seal").value,lot:$("lot").value.trim(),special:$("special").value};
+  if(!canEditBooking()){
+      alert("This booking is locked for the customer. RS employees and Admin can amend confirmed bookings.");
+      return false;
+    }
+  const before={...job};
+  job={...job,jobNo:$("jobNo").value.trim(),customer:$("customer").value.trim(),po:$("po").value.trim(),wo:$("wo").value.trim(),received:$("received").value,due:$("due").value,service:$("service").value,spec:$("spec").value,specOther:$("specOther").value.trim(),specRev:$("specRev").value.trim(),process:$("process").value,colour:$("colour").value,thickness:Number($("thickness").value),coc:$("cocRequired").value,etch:$("etch").value,seal:$("seal").value,lot:$("lot").value.trim(),special:$("special").value,status:"AWAITING CONFIRMATION"};
+  const tracked=[["Customer","customer"],["Customer PO","po"],["Works Order","wo"],["Date Received","received"],["Service Level","service"],["Specification","spec"],["Specification Revision","specRev"],["Process","process"],["Colour","colour"],["Minimum Thickness","thickness"],["CoC Required","coc"],["Etch","etch"],["Seal","seal"],["Due Date","due"]];
+  tracked.forEach(([label,key])=>{
+    if(String(before[key]??"")!==String(job[key]??"")){
+      audit("Booking amended",label,before[key],job[key]);
+    }
+  });
   const empty=parts.filter(p=>!String(p.partNo||"").trim()&&!String(p.description||"").trim()&&!Number(p.quantity)&&!p.drawing&&!p.image&&!String(p.surfaceArea||"").trim()&&!String(p.grade||"").trim());
   parts=parts.filter(p=>!empty.includes(p));
   if(!parts.length){alert("Add at least one part.");return false}
@@ -188,8 +295,14 @@ function saveBooking(){
     return false;
   }
   const stored=save();
+  if(job.draftId){
+    const remaining=draftStore().filter(d=>d.id!==job.draftId);
+    saveDraftStore(remaining);
+    delete job.draftId;
+    save();
+  }
   if(!stored)alert("Booking validated, but browser storage is full. The booking remains on this page; export/backend storage will be added later.");
-  $("bstatus").value="BOOKED / READY FOR PRODUCTION";if($("bookingSaveStatus"))$("bookingSaveStatus").textContent="Booking saved successfully — Batch Card opened.";
+  $("bstatus").value="AWAITING CONFIRMATION";if($("bookingSaveStatus"))$("bookingSaveStatus").textContent="Booking submitted — awaiting RS Anodising confirmation.";
   renderBatch();
   document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
   document.querySelectorAll("nav button")[1].classList.add("active");
@@ -197,7 +310,7 @@ function saveBooking(){
   $("batch").classList.add("active");
   return true;
 }
-function renderBatch(){load();$("bjob").textContent=job.jobNo||"";$("bcustomer").textContent=job.customer||"";$("bpo").textContent=job.po||"Not supplied";$("bwo").textContent=job.wo||"Not supplied";$("bspec").value=job.spec==="OTHER"?job.specOther:job.spec||"";$("bspecrev").value=job.specRev||"";$("bprocess").value=job.process||"";$("bcolour").value=job.colour||"";$("bthick").value=(job.thickness||"")+" µm";$("bcoc").value=job.coc||"NO";$("betch").value=job.etch||"";$("bseal").value=job.seal||"";$("blot").value=job.lot||"";$("breceived").value=job.received||"";$("bdue").value=job.due||"";$("bstatus").value="IN PRODUCTION";$("bspecial").textContent=job.special||"None";let c=$("batchParts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="card"><div class="parthead"><h2>PART ${i+1} — ${esc(p.partNo)}</h2><span class="status ${p.qc.result==="PASS"?"pass":"hold"}">${p.qc.result||"NOT PROCESSED"}</span></div><div class="parttop"><div>${img(p.image)}<p style="font-size:12px;text-align:center">Part visual reference</p></div><div class="grid3"><div><label>Part Number</label><input class="readonly" readonly value="${esc(p.partNo)}"></div><div><label>Description</label><input class="readonly" readonly value="${esc(p.description)}"></div><div><label>Material</label><input class="readonly" readonly value="${esc(selectedGrade(p))}"></div><div><label>Drawing</label><input class="readonly" readonly value="${esc(p.drawing)}"></div><div><label>Revision</label><input class="readonly" readonly value="${esc(p.revision)}"></div><div><label>Quantity</label><input class="readonly" readonly value="${p.quantity}"></div><div><label>Surface Area</label><input class="readonly" readonly value="${esc(p.surfaceArea)}"></div></div></div><div class="jig"><h3>JIGGING</h3><div class="grid4"><div><label>Rack ID</label><input value="${esc(p.jig.rack)}" onchange="jig(${p.id},'rack',this.value)"></div><div><label>Jig ID</label><input value="${esc(p.jig.jig)}" onchange="jig(${p.id},'jig',this.value)"></div><div><label>Quantity Jigged</label><input type="number" value="${p.jig.qty}" onchange="jig(${p.id},'qty',Number(this.value))"></div><div><label>Operator</label><input value="${esc(p.jig.operator)}" onchange="jig(${p.id},'operator',this.value)"></div></div><br><label>Jigging Notes</label><textarea onchange="jig(${p.id},'notes',this.value)">${esc(p.jig.notes)}</textarea><div class="grid"><div><label>Jigging Reference Image</label>${img(p.jig.reference)}<input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'ref')"></div><div><label>Actual Jigged Load</label>${img(p.jig.actual)}<input type="file" accept="image/*" capture="environment" onchange="imageUpload(${p.id},this,'actual')"></div></div></div></div>`})}
+function renderBatch(){load();$("bjob").textContent=job.jobNo||"";$("bcustomer").textContent=job.customer||"";$("bpo").textContent=job.po||"Not supplied";$("bwo").textContent=job.wo||"Not supplied";$("bspec").value=job.spec==="OTHER"?job.specOther:job.spec||"";$("bspecrev").value=job.specRev||"";$("bprocess").value=job.process||"";$("bcolour").value=job.colour||"";$("bthick").value=(job.thickness||"")+" µm";$("bcoc").value=job.coc||"NO";$("betch").value=job.etch||"";$("bseal").value=job.seal||"";$("blot").value=job.lot||"";$("bservice").value=job.service||"STANDARD";$("breceived").value=job.received||"";$("bdue").value=job.due||"";$("bstatus").value="IN PRODUCTION";$("bspecial").textContent=job.special||"None";let c=$("batchParts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="card"><div class="parthead"><h2>PART ${i+1} — ${esc(p.partNo)}</h2><span class="status ${p.qc.result==="PASS"?"pass":"hold"}">${p.qc.result||"NOT PROCESSED"}</span></div><div class="parttop"><div>${img(p.image)}<p style="font-size:12px;text-align:center">Part visual reference</p></div><div class="grid3"><div><label>Part Number</label><input class="readonly" readonly value="${esc(p.partNo)}"></div><div><label>Description</label><input class="readonly" readonly value="${esc(p.description)}"></div><div><label>Material</label><input class="readonly" readonly value="${esc(selectedGrade(p))}"></div><div><label>Drawing</label><input class="readonly" readonly value="${esc(p.drawing)}"></div><div><label>Revision</label><input class="readonly" readonly value="${esc(p.revision)}"></div><div><label>Quantity</label><input class="readonly" readonly value="${p.quantity}"></div><div><label>Surface Area</label><input class="readonly" readonly value="${esc(p.surfaceArea)}"></div></div></div><div class="jig"><h3>JIGGING</h3><div class="grid4"><div><label>Rack ID</label><input value="${esc(p.jig.rack)}" onchange="jig(${p.id},'rack',this.value)"></div><div><label>Jig ID</label><input value="${esc(p.jig.jig)}" onchange="jig(${p.id},'jig',this.value)"></div><div><label>Quantity Jigged</label><input type="number" value="${p.jig.qty}" onchange="jig(${p.id},'qty',Number(this.value))"></div><div><label>Operator</label><input value="${esc(p.jig.operator)}" onchange="jig(${p.id},'operator',this.value)"></div></div><br><label>Jigging Notes</label><textarea onchange="jig(${p.id},'notes',this.value)">${esc(p.jig.notes)}</textarea><div class="grid"><div><label>Jigging Reference Image</label>${img(p.jig.reference)}<input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'ref')"></div><div><label>Actual Jigged Load</label>${img(p.jig.actual)}<input type="file" accept="image/*" capture="environment" onchange="imageUpload(${p.id},this,'actual')"></div></div></div></div>`})}
 function jig(id,f,v){let p=parts.find(x=>x.id===id);p.jig[f]=v;save()}
 function readingInputs(p){
   if(!Array.isArray(p.qc.readings))p.qc.readings=[];
@@ -219,6 +332,9 @@ function closeModal(){$("modal").classList.remove("show")}
 $("cmGrade").innerHTML=AL_GRADES.map(x=>`<option value="${esc(x[0])}">${esc(x[1])}</option>`).join("");$("spec").innerHTML=SPECS.map(x=>`<option value="${esc(x[0])}">${esc(x[0])} — ${esc(x[1])}</option>`).join("");
 $("received").value=new Date().toISOString().slice(0,10);
 load();
+$("userRole").value=job.lastRole||"ADMIN";
+$("bookingStatus").value=job.status||"AWAITING CONFIRMATION";
+$("currentUser").value=roleName($("userRole").value);
 if(!parts.length)addPart();else renderParts();
 if(job.customer)$("customer").value=job.customer;
 if(job.po)$("po").value=job.po;
@@ -227,7 +343,9 @@ if(job.spec)$("spec").value=job.spec;
 if(job.specRev)$("specRev").value=job.specRev;
 if(job.thickness)$("thickness").value=job.thickness;
 if(job.coc)$("cocRequired").value=job.coc;
-specChanged();
+if(job.service)$("service").value=job.service;
+updateDueDate();
+specChanged();renderAudit();renderDrafts();applyPermissions();
 </script>
 </body>
 </html>
