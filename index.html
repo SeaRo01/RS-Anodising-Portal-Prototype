@@ -3,37 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RS Anodising | Traceability Portal</title>
+<title>RS Anodising | Portal V8</title>
 <style>
-:root{--g:#2f6f52;--gd:#1f4d39;--gl:#e2eee8;--d:#252b2a;--m:#89918e;--ml:#dce1df;--bg:#eef1f0;--w:#fff;--b:#c8cfcc;--pass:#247a45;--fail:#b52a25;--hold:#a27616}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#252525}
-header{background:linear-gradient(135deg,#1f2925,#40534a,#1f2925);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--g)}
-header h1{margin:0;font-size:22px}header small{opacity:.75}nav{background:var(--d);display:flex;overflow:auto}nav button{border:0;background:transparent;color:#d5dbd8;padding:14px 18px;font-weight:bold;cursor:pointer}nav button.active{background:var(--g);color:#fff}
-.container{max-width:1450px;margin:24px auto;padding:0 18px}.page{display:none}.page.active{display:block}.card{background:#fff;border:1px solid var(--b);border-radius:7px;padding:20px;margin-bottom:18px;box-shadow:0 3px 10px #0000000d}.card h2{margin:0 0 15px;color:var(--gd);border-bottom:2px solid var(--ml);padding-bottom:10px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}label{display:block;font-size:12px;font-weight:bold;color:#4d5553;margin-bottom:5px}input,select,textarea{width:100%;padding:9px;border:1px solid #bbc4c0;border-radius:5px;background:#fff}textarea{min-height:75px}.readonly{background:#edf0ef}
-button.action{border:0;border-radius:5px;padding:10px 15px;font-weight:bold;cursor:pointer;margin:3px}.primary{background:linear-gradient(135deg,var(--g),var(--gd));color:#fff}.secondary{background:linear-gradient(#e8ebea,#cfd5d2);color:#222}.danger{background:var(--fail);color:#fff}.success{background:var(--pass);color:#fff}
-.notice{background:var(--gl);border-left:5px solid var(--g);padding:12px;margin-bottom:18px}.part{border:1px solid var(--b);border-left:5px solid var(--g);padding:17px;border-radius:6px;margin:12px 0;background:#fafcfb}.parthead{display:flex;justify-content:space-between;align-items:center}.parthead h3{color:var(--gd)}
-.thumb{width:170px;height:125px;border:2px dashed #aab3af;border-radius:6px;background:#f3f5f4;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;text-align:center;color:#707976}.thumb img{width:100%;height:100%;object-fit:contain;background:#fff}
-.parttop{display:grid;grid-template-columns:190px 1fr;gap:20px}.jig{margin-top:15px;background:#edf4f0;border:1px solid #c9d8d0;border-radius:6px;padding:15px}.jig h3{margin-top:0;color:var(--gd)}
-.batchhead{background:linear-gradient(135deg,#27322e,#40534a);color:#fff;padding:20px;border-radius:7px;margin-bottom:18px}.batchhead h2{margin:0 0 15px}.batchmeta{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.batchmeta div{background:#ffffff12;border:1px solid #ffffff22;padding:10px;border-radius:4px}.batchmeta small{display:block;opacity:.7}
-table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #dde2e0;text-align:left;font-size:13px}th{background:linear-gradient(#e7eae9,#d4d9d7)}.status{display:inline-block;padding:5px 10px;border-radius:15px;font-size:11px;font-weight:bold}.pass{background:#d9f0df;color:#17632f}.fail{background:#f8d8d6;color:#941f1b}.hold{background:#fff0c4;color:#735300}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{padding:15px;background:linear-gradient(135deg,#f4f6f5,#dfe4e2);border:1px solid var(--b);border-radius:6px}.stat strong{display:block;font-size:23px;color:var(--gd)}
-.coc{background:#fff;border:1px solid #aaa;padding:35px;max-width:1050px;margin:auto}.cochead{text-align:center;border-bottom:3px solid var(--g);padding-bottom:15px}.cochead h1{color:var(--gd)}.modal{display:none;position:fixed;inset:0;background:#000c;z-index:9;align-items:center;justify-content:center}.modal.show{display:flex}.modal img{max-width:90vw;max-height:88vh;background:#fff}.close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;cursor:pointer}
-@media(max-width:850px){.grid,.grid3,.grid4,.batchmeta,.stats,.parttop{grid-template-columns:1fr}.thumb{width:100%;max-width:300px}}
-@media print{header,nav,.action{display:none!important}body{background:#fff}.coc{border:0;box-shadow:none}}
+:root{
+  --green:#58c51f;--green2:#2f8f16;--green-dark:#1d3b25;
+  --navy:#152033;--navy2:#202c40;--bg:#f5f7f8;--card:#fff;
+  --text:#24302a;--muted:#738079;--border:#e3e8e5;
+  --success:#36a269;--warning:#d89b21;--danger:#c94a42;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+header{
+  height:68px;background:#fff;color:var(--text);padding:0 24px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5
+}
+header h1{margin:0;font-size:19px;letter-spacing:-.2px}
+header small{color:var(--muted)}
+header select{border:1px solid var(--border)!important;border-radius:8px!important;background:#fff!important;padding:8px 10px!important}
+nav{
+  position:fixed;left:0;top:68px;bottom:0;width:235px;background:var(--navy);
+  display:flex;flex-direction:column;padding:18px 12px;overflow:auto;z-index:4
+}
+nav button{
+  border:0;background:transparent;color:#bfc8d2;padding:12px 14px;font-weight:600;
+  cursor:pointer;border-radius:9px;text-align:left;margin:2px 0;font-size:13px
+}
+nav button:hover{background:#ffffff0d;color:#fff}
+nav button.active{background:#dff7d4;color:#2c6e1e}
+.container{max-width:none;margin:0 0 0 235px;padding:28px 28px 60px}
+.page{display:none}.page.active{display:block}
+.pageTitle{margin:0 0 4px;font-size:25px;letter-spacing:-.4px}.pageSubtitle{color:var(--muted);margin-bottom:22px}
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;
+  margin-bottom:18px;box-shadow:0 1px 2px #15203308
+}
+.card h2{margin:0 0 16px;color:#26332c;border:0;padding:0;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+label{display:block;font-size:11px;font-weight:700;color:#5d6862;margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px 11px;border:1px solid #d4dcd7;border-radius:8px;background:#fff;color:#26302b;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#78c95d;box-shadow:0 0 0 3px #58c51f18}
+textarea{min-height:85px}.readonly{background:#f2f5f3}
+button.action{border:0;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer;margin:3px}
+.primary{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff}
+.secondary{background:#fff;border:1px solid #d4dcd7!important;color:#344039}
+.danger{background:#c94a42;color:#fff}.success{background:#36a269;color:#fff}
+.notice{background:#eef9ea;border-left:4px solid var(--green);padding:11px 13px;margin-bottom:16px;border-radius:6px;color:#415148}
+.part{border:1px solid var(--border);padding:17px;border-radius:10px;margin:12px 0;background:#fbfcfc}
+.parthead{display:flex;justify-content:space-between;align-items:center}.parthead h3{color:#2b4230;margin:0}
+.thumb{width:170px;height:125px;border:2px dashed #cbd5cf;border-radius:8px;background:#f7f9f8;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;text-align:center;color:#7a8580}
+.thumb img{width:100%;height:100%;object-fit:contain;background:#fff}
+.parttop{display:grid;grid-template-columns:190px 1fr;gap:20px}
+.jig{margin-top:15px;background:#f1f8ee;border:1px solid #d7e8d0;border-radius:8px;padding:15px}.jig h3{margin-top:0;color:#2f6f22}
+.batchhead{background:linear-gradient(135deg,#162235,#26374d);color:#fff;padding:20px;border-radius:12px;margin-bottom:18px}
+.batchhead h2{margin:0 0 15px}.batchmeta{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.batchmeta div{background:#ffffff10;border:1px solid #ffffff20;padding:10px;border-radius:7px}.batchmeta small{display:block;opacity:.7}
+table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid #e8ecea;text-align:left;font-size:13px}th{background:#f5f7f6;color:#5b6660}
+.status{display:inline-block;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700}.pass{background:#dcf4e5;color:#176b38}.fail{background:#f9dfdd;color:#941f1b}.hold{background:#fff1cf;color:#735300}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat{padding:17px;background:#fff;border:1px solid var(--border);border-radius:12px}
+.stat strong{display:block;font-size:25px;color:#263a2c;margin-top:7px}.stat span{color:var(--muted);font-size:12px}
+.hero{background:linear-gradient(135deg,#4cc51c,#2f8f16);color:#fff;border-radius:13px;padding:22px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.hero h2{margin:0 0 6px;color:#fff}.hero p{margin:0;opacity:.9}.hero .action{background:#fff;color:#2f7b1d}
+.quickGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.quick{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px}.quick b{font-size:20px}.quick small{display:block;color:var(--muted);margin-top:5px}
+.coc{background:#fff;border:1px solid #aaa;padding:35px;max-width:1050px;margin:auto}.cochead{text-align:center;border-bottom:3px solid var(--green);padding-bottom:15px}.cochead h1{color:#2f6f22}
+.modal{display:none;position:fixed;inset:0;background:#000c;z-index:9;align-items:center;justify-content:center}.modal.show{display:flex}.modal img{max-width:90vw;max-height:88vh;background:#fff}.close{position:absolute;right:25px;top:15px;color:#fff;font-size:35px;cursor:pointer}
+@media(max-width:1050px){nav{width:200px}.container{margin-left:200px}.grid3,.grid4,.stats,.quickGrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){
+  header{height:auto;padding:12px 15px}nav{position:static;width:auto;flex-direction:row;top:auto;bottom:auto;padding:8px;overflow:auto}
+  .container{margin:0;padding:18px}.grid,.grid3,.grid4,.batchmeta,.stats,.parttop,.quickGrid{grid-template-columns:1fr}
+  nav button{white-space:nowrap}.hero{align-items:flex-start;gap:15px;flex-direction:column}
+}
+@media print{header,nav,.action{display:none!important}body{background:#fff}.container{margin:0}.coc{border:0;box-shadow:none}}
 </style>
 </head>
 <body>
 <header><div><h1>RS Anodising</h1><small>Production & Traceability Portal</small></div><div style="text-align:right"><small>Signed in as</small><br><select id="userRole" onchange="setRole(this.value)" style="padding:5px;border-radius:4px"><option value="ADMIN">Admin</option><option value="EMPLOYEE">Employee</option><option value="CUSTOMER">Customer</option></select></div></header>
 <nav>
-<button class="active" onclick="page('booking',this)">Booking In</button>
-<button onclick="page('batch',this)">Batch Card</button>
-<button onclick="page('qc',this)">Quality Control</button>
-<button onclick="page('coc',this)">Certificate of Conformity</button>
-<button onclick="page('customers',this)">Customers / Parts</button><button onclick="page('pricing',this)">Pricing</button>
+<button class="active" onclick="page('dashboard',this)">▦ &nbsp; Dashboard</button>
+<button onclick="page('booking',this)">＋ &nbsp; New Booking</button>
+<button onclick="page('drafts',this)">◷ &nbsp; Drafts</button>
+<button onclick="page('batch',this)">▤ &nbsp; Batch Cards</button>
+<button onclick="page('qc',this)">✓ &nbsp; Quality Control</button>
+<button onclick="page('coc',this)">▧ &nbsp; Certificates of Conformity</button>
+<button onclick="page('customers',this)">◉ &nbsp; My Parts / Customers</button>
+<button onclick="page('pricing',this)">⚙ &nbsp; Pricing</button>
 </nav>
 <main class="container">
 
+
+<section id="dashboard" class="page active">
+  <h1 class="pageTitle">Dashboard</h1>
+  <div class="pageSubtitle">RS Anodising portal overview</div>
+  <div class="hero">
+    <div><h2>Create a new anodising booking</h2><p>Get an instant estimate and submit your booking to RS Anodising.</p></div>
+    <button class="action" onclick="page('booking',document.querySelectorAll('nav button')[1])">＋ New Booking</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><span>Active Bookings</span><strong id="dashActive">0</strong></div>
+    <div class="stat"><span>Drafts</span><strong id="dashDrafts">0</strong></div>
+    <div class="stat"><span>Awaiting Confirmation</span><strong id="dashAwaiting">0</strong></div>
+    <div class="stat"><span>Completed</span><strong id="dashCompleted">0</strong></div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <h2>Recent Bookings</h2>
+    <table><thead><tr><th>Booking</th><th>Customer</th><th>Part</th><th>Estimate</th><th>Status</th></tr></thead>
+    <tbody id="dashboardRows"><tr><td colspan="5">No bookings yet.</td></tr></tbody></table>
+  </div>
+</section>
+
+<section id="drafts" class="page">
+  <h1 class="pageTitle">Saved Drafts</h1>
+  <div class="pageSubtitle">Return to unfinished customer bookings without losing entered information.</div>
+  <div class="card">
+    <table><thead><tr><th>Saved</th><th>Customer</th><th>Job</th><th>Parts</th><th>Service</th><th>Status</th><th></th></tr></thead>
+    <tbody id="draftRows"><tr><td colspan="7">No saved drafts.</td></tr></tbody></table>
+  </div>
+</section>
 <section id="booking" class="page active">
 <div class="notice"><b>Booking In:</b> the RS Job / Order No. is the master job reference. Service level automatically sets the target due date. Customers submit bookings for RS confirmation. Customer PO, Works Order, specification and part information are copied into the job record.</div>
 <div class="notice"><b>Permission rule:</b> Confirmed bookings are locked for the customer. RS employees and Admin can still amend the booking, and amendments are recorded in the audit log.</div><div class="card"><h2>Job / Customer</h2><div class="grid">
@@ -201,7 +288,19 @@ function $(id){return document.getElementById(id)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function save(){try{localStorage.rsJob=JSON.stringify(job);localStorage.rsParts=JSON.stringify(parts);localStorage.rsMasters=JSON.stringify(masters);return true}catch(e){console.warn("Local storage save failed:",e);return false}}
 function load(){try{job=JSON.parse(localStorage.rsJob)||job;parts=JSON.parse(localStorage.rsParts)||[];masters=JSON.parse(localStorage.rsMasters)||[]}catch(e){}}
-function page(id,btn){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="batch")renderBatch();if(id==="qc")renderQC();if(id==="coc")renderCoC();if(id==="customers")renderMasters();if(id==="pricing")loadPricingInputs()}
+function page(id,btn){
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  if($(id))$(id).classList.add("active");
+  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+  if(btn)btn.classList.add("active");
+  if(id==="dashboard")renderDashboard();
+  if(id==="drafts")renderDrafts();
+  if(id==="batch")renderBatch();
+  if(id==="qc")renderQC();
+  if(id==="coc")renderCoC();
+  if(id==="customers")renderMasters();
+  if(id==="pricing")loadPricingInputs();
+}
 function specChanged(){let other=$("spec").value==="OTHER";$("specOther").disabled=!other;if(!other)$("specOther").value=""}
 function addPart(){parts.push({id:Date.now(),partNo:"",description:"",drawing:"",revision:"",grade:"",gradeOther:"",quantity:0,image:"",surfaceArea:"",jig:{rack:"",jig:"",qty:0,operator:"",notes:"",reference:"",actual:""},qc:{readings:[],visual:"",seal:"",checked:0,passed:0,result:"HOLD"}});renderParts()}
 function removePart(id){parts=parts.filter(p=>p.id!==id);renderParts();save()}
@@ -597,7 +696,7 @@ function saveForLater(){
   if(!saveDraftStore(drafts))return;
   job.draftId=id;job.status="DRAFT";save();
   $("bookingSaveStatus").textContent="Draft saved. You can return and continue this booking later.";
-  renderDrafts();
+  renderDrafts();renderDashboard();
 }
 function loadDraft(id){
   const d=draftStore().find(x=>x.id===id);
@@ -631,6 +730,24 @@ function deleteDraft(id){
   saveDraftStore(draftStore().filter(x=>x.id!==id));
   if(job.draftId===id){delete job.draftId;save()}
   renderDrafts();
+}
+
+function renderDashboard(){
+  const drafts=draftStore();
+  const active=(job.status!=="COMPLETED"&&job.status!=="DISPATCHED")?1:0;
+  if($("dashActive"))$("dashActive").textContent=active;
+  if($("dashDrafts"))$("dashDrafts").textContent=drafts.length;
+  if($("dashAwaiting"))$("dashAwaiting").textContent=(job.status==="AWAITING CONFIRMATION"?1:0);
+  if($("dashCompleted"))$("dashCompleted").textContent=(job.status==="COMPLETED"||job.status==="DISPATCHED"?1:0);
+  const t=$("dashboardRows"); if(!t)return;
+  const part=parts[0];
+  t.innerHTML=`<tr>
+    <td>${esc(job.jobNo||"ORD100001768")}</td>
+    <td>${esc(job.customer||"—")}</td>
+    <td>${esc(part?.description||part?.partNo||"—")}</td>
+    <td>£${Number(pricing.finalTotal||0).toFixed(2)}</td>
+    <td><span class="status ${job.status==="CONFIRMED"?"pass":"hold"}">${esc(job.status||"AWAITING CONFIRMATION")}</span></td>
+  </tr>`;
 }
 function renderDrafts(){
   const t=$("draftRows");if(!t)return;
@@ -670,5 +787,6 @@ if(job.service)$("service").value=job.service;
 updateDueDate();
 specChanged();renderAudit();renderDrafts();applyPermissions();renderEstimate();
 </script>
+<script>document.addEventListener("DOMContentLoaded",()=>{renderDashboard();renderDrafts();});</script>
 </body>
 </html>
