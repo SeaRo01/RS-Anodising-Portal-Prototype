@@ -60,7 +60,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <br><label>Customer-specific requirements / special instructions</label><textarea id="special"></textarea></div>
 
 <div class="card"><h2>Parts on this Job</h2><div id="parts"></div><button class="action secondary" onclick="addPart()">+ Add Part</button></div>
-<div class="card"><button class="action primary" onclick="saveBooking()">Save Booking / Open Batch Card</button></div>
+<div class="card"><button type="button" class="action primary" onclick="saveBooking()">Save Booking / Open Batch Card</button><div id="bookingSaveStatus" style="margin-top:10px;font-weight:bold;color:#2f6f52"></div></div>
 </section>
 
 <section id="batch" class="page">
@@ -133,7 +133,7 @@ let job={jobNo:"ORD100001768"},parts=[],masters=[];
 
 function $(id){return document.getElementById(id)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function save(){localStorage.rsJob=JSON.stringify(job);localStorage.rsParts=JSON.stringify(parts);localStorage.rsMasters=JSON.stringify(masters)}
+function save(){try{localStorage.rsJob=JSON.stringify(job);localStorage.rsParts=JSON.stringify(parts);localStorage.rsMasters=JSON.stringify(masters);return true}catch(e){console.warn("Local storage save failed:",e);return false}}
 function load(){try{job=JSON.parse(localStorage.rsJob)||job;parts=JSON.parse(localStorage.rsParts)||[];masters=JSON.parse(localStorage.rsMasters)||[]}catch(e){}}
 function page(id,btn){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));btn.classList.add("active");if(id==="batch")renderBatch();if(id==="qc")renderQC();if(id==="coc")renderCoC();if(id==="customers")renderMasters()}
 function specChanged(){let other=$("spec").value==="OTHER";$("specOther").disabled=!other;if(!other)$("specOther").value=""}
@@ -142,10 +142,61 @@ function removePart(id){parts=parts.filter(p=>p.id!==id);renderParts();save()}
 function gradeOptions(selected=""){return AL_GRADES.map(g=>`<option value="${esc(g[0])}" ${selected===g[0]?"selected":""}>${esc(g[1])}</option>`).join("")}
 function selectedGrade(p){return p.grade==="Other"?(p.gradeOther||"Other"):(p.grade||"Not specified")}
 function setPart(id,f,v){let p=parts.find(x=>x.id===id);if(!p)return;if(f==="grade"&&v==="Other"){let custom=prompt("Enter aluminium grade:",p.gradeOther||"");if(custom===null)return;p.gradeOther=custom.trim()}p[f]=v;save()}
-function imageUpload(id,input,type){let f=input.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{let p=parts.find(x=>x.id===id);if(type==="part")p.image=e.target.result;if(type==="ref")p.jig.reference=e.target.result;if(type==="actual")p.jig.actual=e.target.result;save();renderParts();renderBatch()};r.readAsDataURL(f)}
+function imageUpload(id,input,type){
+  const f=input.files && input.files[0];
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const image=new Image();
+    image.onload=()=>{
+      const max=1400;
+      const scale=Math.min(1,max/Math.max(image.width,image.height));
+      const canvas=document.createElement("canvas");
+      canvas.width=Math.max(1,Math.round(image.width*scale));
+      canvas.height=Math.max(1,Math.round(image.height*scale));
+      const ctx=canvas.getContext("2d");
+      ctx.drawImage(image,0,0,canvas.width,canvas.height);
+      const data=canvas.toDataURL("image/jpeg",0.82);
+      const p=parts.find(x=>x.id===id);
+      if(!p)return;
+      if(type==="part")p.image=data;
+      if(type==="ref")p.jig.reference=data;
+      if(type==="actual")p.jig.actual=data;
+      try{save()}catch(err){console.warn("Image saved in current session but local storage was full.",err)}
+      renderParts();
+      renderBatch();
+    };
+    image.src=e.target.result;
+  };
+  r.readAsDataURL(f);
+}
 function img(src,cls="thumb"){return src?`<div class="${cls}" onclick="openModal('${src}')"><img src="${src}"></div>`:`<div class="${cls}">No image uploaded</div>`}
 function renderParts(){let c=$("parts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="part"><div class="parthead"><h3>Part ${i+1}</h3><button class="action danger" onclick="removePart(${p.id})">Remove</button></div><div class="parttop"><div>${img(p.image)}<br><label>Part Image</label><input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'part')"></div><div class="grid3"><div><label>Part Number</label><input value="${esc(p.partNo)}" onchange="setPart(${p.id},'partNo',this.value)"></div><div><label>Description</label><input value="${esc(p.description)}" onchange="setPart(${p.id},'description',this.value)"></div><div><label>Drawing</label><input value="${esc(p.drawing)}" onchange="setPart(${p.id},'drawing',this.value)"></div><div><label>Drawing Revision</label><input value="${esc(p.revision)}" onchange="setPart(${p.id},'revision',this.value)"></div><div><label>Aluminium Grade (optional)</label><select onchange="setPart(${p.id},'grade',this.value)">${gradeOptions(p.grade)}</select></div><div><label>Quantity</label><input type="number" value="${p.quantity}" onchange="setPart(${p.id},'quantity',Number(this.value))"></div><div><label>Surface Area (mm²)</label><input value="${esc(p.surfaceArea)}" onchange="setPart(${p.id},'surfaceArea',this.value)"></div></div></div></div>`})}
-function saveBooking(){job={...job,jobNo:$("jobNo").value,customer:$("customer").value,po:$("po").value,wo:$("wo").value,received:$("received").value,due:$("due").value,spec:$("spec").value,specOther:$("specOther").value,specRev:$("specRev").value,process:$("process").value,colour:$("colour").value,thickness:Number($("thickness").value),coc:$("cocRequired").value,etch:$("etch").value,seal:$("seal").value,lot:$("lot").value,special:$("special").value};let empty=parts.filter(p=>!String(p.partNo||"").trim()&&!String(p.description||"").trim()&&!Number(p.quantity)&&!p.drawing&&!p.image&&!String(p.surfaceArea||"").trim()&&!String(p.grade||"").trim());parts=parts.filter(p=>!empty.includes(p));if(!parts.length){alert("Add at least one part.");return}let incomplete=parts.find(p=>!String(p.partNo||"").trim()||!String(p.description||"").trim()||!Number(p.quantity));if(incomplete){let missing=[];if(!String(incomplete.partNo||"").trim())missing.push("Part Number");if(!String(incomplete.description||"").trim())missing.push("Part Name");if(!Number(incomplete.quantity))missing.push("Quantity");alert("This part is incomplete. Missing: "+missing.join(", ")+". Complete the part or remove it.");renderParts();return}save();alert("Booking saved.");renderBatch();page("batch",document.querySelectorAll("nav button")[1])}
+function saveBooking(){
+  job={...job,jobNo:$("jobNo").value.trim(),customer:$("customer").value.trim(),po:$("po").value.trim(),wo:$("wo").value.trim(),received:$("received").value,due:$("due").value,spec:$("spec").value,specOther:$("specOther").value.trim(),specRev:$("specRev").value.trim(),process:$("process").value,colour:$("colour").value,thickness:Number($("thickness").value),coc:$("cocRequired").value,etch:$("etch").value,seal:$("seal").value,lot:$("lot").value.trim(),special:$("special").value};
+  const empty=parts.filter(p=>!String(p.partNo||"").trim()&&!String(p.description||"").trim()&&!Number(p.quantity)&&!p.drawing&&!p.image&&!String(p.surfaceArea||"").trim()&&!String(p.grade||"").trim());
+  parts=parts.filter(p=>!empty.includes(p));
+  if(!parts.length){alert("Add at least one part.");return false}
+  const incomplete=parts.find(p=>!String(p.partNo||"").trim()||!String(p.description||"").trim()||!Number(p.quantity));
+  if(incomplete){
+    let missing=[];
+    if(!String(incomplete.partNo||"").trim())missing.push("Part Number");
+    if(!String(incomplete.description||"").trim())missing.push("Part Name");
+    if(!Number(incomplete.quantity))missing.push("Quantity");
+    alert("This part is incomplete. Missing: "+missing.join(", ")+". Complete the part or remove it.");
+    renderParts();
+    return false;
+  }
+  const stored=save();
+  if(!stored)alert("Booking validated, but browser storage is full. The booking remains on this page; export/backend storage will be added later.");
+  $("bstatus").value="BOOKED / READY FOR PRODUCTION";if($("bookingSaveStatus"))$("bookingSaveStatus").textContent="Booking saved successfully — Batch Card opened.";
+  renderBatch();
+  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll("nav button")[1].classList.add("active");
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  $("batch").classList.add("active");
+  return true;
+}
 function renderBatch(){load();$("bjob").textContent=job.jobNo||"";$("bcustomer").textContent=job.customer||"";$("bpo").textContent=job.po||"Not supplied";$("bwo").textContent=job.wo||"Not supplied";$("bspec").value=job.spec==="OTHER"?job.specOther:job.spec||"";$("bspecrev").value=job.specRev||"";$("bprocess").value=job.process||"";$("bcolour").value=job.colour||"";$("bthick").value=(job.thickness||"")+" µm";$("bcoc").value=job.coc||"NO";$("betch").value=job.etch||"";$("bseal").value=job.seal||"";$("blot").value=job.lot||"";$("breceived").value=job.received||"";$("bdue").value=job.due||"";$("bstatus").value="IN PRODUCTION";$("bspecial").textContent=job.special||"None";let c=$("batchParts");c.innerHTML="";parts.forEach((p,i)=>{c.innerHTML+=`<div class="card"><div class="parthead"><h2>PART ${i+1} — ${esc(p.partNo)}</h2><span class="status ${p.qc.result==="PASS"?"pass":"hold"}">${p.qc.result||"NOT PROCESSED"}</span></div><div class="parttop"><div>${img(p.image)}<p style="font-size:12px;text-align:center">Part visual reference</p></div><div class="grid3"><div><label>Part Number</label><input class="readonly" readonly value="${esc(p.partNo)}"></div><div><label>Description</label><input class="readonly" readonly value="${esc(p.description)}"></div><div><label>Material</label><input class="readonly" readonly value="${esc(selectedGrade(p))}"></div><div><label>Drawing</label><input class="readonly" readonly value="${esc(p.drawing)}"></div><div><label>Revision</label><input class="readonly" readonly value="${esc(p.revision)}"></div><div><label>Quantity</label><input class="readonly" readonly value="${p.quantity}"></div><div><label>Surface Area</label><input class="readonly" readonly value="${esc(p.surfaceArea)}"></div></div></div><div class="jig"><h3>JIGGING</h3><div class="grid4"><div><label>Rack ID</label><input value="${esc(p.jig.rack)}" onchange="jig(${p.id},'rack',this.value)"></div><div><label>Jig ID</label><input value="${esc(p.jig.jig)}" onchange="jig(${p.id},'jig',this.value)"></div><div><label>Quantity Jigged</label><input type="number" value="${p.jig.qty}" onchange="jig(${p.id},'qty',Number(this.value))"></div><div><label>Operator</label><input value="${esc(p.jig.operator)}" onchange="jig(${p.id},'operator',this.value)"></div></div><br><label>Jigging Notes</label><textarea onchange="jig(${p.id},'notes',this.value)">${esc(p.jig.notes)}</textarea><div class="grid"><div><label>Jigging Reference Image</label>${img(p.jig.reference)}<input type="file" accept="image/*" onchange="imageUpload(${p.id},this,'ref')"></div><div><label>Actual Jigged Load</label>${img(p.jig.actual)}<input type="file" accept="image/*" capture="environment" onchange="imageUpload(${p.id},this,'actual')"></div></div></div></div>`})}
 function jig(id,f,v){let p=parts.find(x=>x.id===id);p.jig[f]=v;save()}
 function readingInputs(p){
